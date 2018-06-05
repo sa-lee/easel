@@ -29,17 +29,19 @@ approach is that any other object type in R must first be converted to a
 `data.frame` and any method for effeciently computing on that object type 
 is discarded when constructing a plot. 
 
-Using the layered grammar approach resuls in grammar elements such as stats and 
-geoms that are not independent components
-of a plot object and instead imply each other. For example, `geom_bar` 
+The current ggplot2 API has constructors for geoms and stats that provide
+high-level conveniences, such as a geom implying a stat. For example, `geom_bar` 
 implies `stat_count` or `geom_histogram` implies `stat_bin` and so on. These
 are convienient for the user most of the time but can cause confusion (i.e.
 using `stat_identity` to enable rectangle heights to be proprotional to a
-values of a varialbe for a bar chart). This also results in an ineffeciency
-as the stat methods perform transformations on the data that are not necessarily
-optimal.
+values of a varialbe for a bar chart). It would be better to separate
+convenience constructors from the construction of the actual grammar components.
 
-## What would a fluent grammar of graphics API look like?
+Semantically, the layering of grammar components to create a plot is somewhat at odds
+with the now established fluent, pipeline-based grammars like dplyr. Coincidentally,
+dplyr also provides an abstraction that would solve some of the problems mentioned above.
+
+## What are the potential benefits of a fluent grammar of graphics API?
 
 Or can we make a verb based API based on the grammar of graphics and
 `ggplot2` that:
