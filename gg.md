@@ -293,3 +293,94 @@ compiled into instructions that determine how the graph should be
 rendered. The graphic can then actually be rendered to a graphics device
 with a backend library indedpendently. The *plotly* package uses this
 logic for turning a *ggplot2* object into an interactive figure.
+
+## Implementation thus far
+
+Here’s a rough of our grammar currently we have three functions:
+
+  - visualise (defines what variables to plot)
+  - mutate (transform the available aesthetics)
+  - draw\_ (draw a graphic based on the aesthetics)
+
+<!-- end list -->
+
+``` r
+library(easel)
+library(magrittr)
+p <- mtcars %>% 
+  visualise(x = hp, y = mpg) %>%
+  draw_points()
+str(p)
+```
+
+    ## Classes 'tbl_pl', 'tbl_df', 'tbl' and 'data.frame':  32 obs. of  3 variables:
+    ##  $ x   : num  110 110 93 110 175 105 245 62 95 123 ...
+    ##  $ y   : num  21 21 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 ...
+    ##  $ geom: chr  "point" "point" "point" "point" ...
+    ##  - attr(*, "aes")=List of 2
+    ##   ..$ x: language ~hp
+    ##   .. ..- attr(*, ".Environment")=<environment: 0x7fb7ab0d15b8> 
+    ##   ..$ y: language ~mpg
+    ##   .. ..- attr(*, ".Environment")=<environment: 0x7fb7ab0d15b8> 
+    ##   ..- attr(*, "class")= chr "quosures"
+
+``` r
+p
+```
+
+![](gg_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+
+``` r
+p <- mtcars %>% 
+  visualise(x = hp, y = mpg) %>%
+  draw_points(colour = "red")
+
+str(p)
+```
+
+    ## Classes 'tbl_pl', 'tbl_df', 'tbl' and 'data.frame':  32 obs. of  4 variables:
+    ##  $ x     : num  110 110 93 110 175 105 245 62 95 123 ...
+    ##  $ y     : num  21 21 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 ...
+    ##  $ geom  : chr  "point" "point" "point" "point" ...
+    ##  $ colour: chr  "red" "red" "red" "red" ...
+    ##  - attr(*, "aes")=List of 2
+    ##   ..$ x: language ~hp
+    ##   .. ..- attr(*, ".Environment")=<environment: 0x7fb7ac1ea3f8> 
+    ##   ..$ y: language ~mpg
+    ##   .. ..- attr(*, ".Environment")=<environment: 0x7fb7ac1ea3f8> 
+    ##   ..- attr(*, "class")= chr "quosures"
+
+``` r
+p
+```
+
+![](gg_files/figure-gfm/unnamed-chunk-3-2.png)<!-- -->
+
+``` r
+p <- mtcars %>% 
+  visualise(x = hp, y = mpg, colour = factor(cyl)) %>%
+  draw_points(shape = 5) 
+
+str(p)
+```
+
+    ## Classes 'tbl_pl', 'tbl_df', 'tbl' and 'data.frame':  32 obs. of  5 variables:
+    ##  $ x     : num  110 110 93 110 175 105 245 62 95 123 ...
+    ##  $ y     : num  21 21 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 ...
+    ##  $ colour: Factor w/ 3 levels "4","6","8": 2 2 1 2 3 2 3 1 1 2 ...
+    ##  $ geom  : chr  "point" "point" "point" "point" ...
+    ##  $ shape : num  5 5 5 5 5 5 5 5 5 5 ...
+    ##  - attr(*, "aes")=List of 3
+    ##   ..$ x     : language ~hp
+    ##   .. ..- attr(*, ".Environment")=<environment: 0x7fb7ab09ed30> 
+    ##   ..$ y     : language ~mpg
+    ##   .. ..- attr(*, ".Environment")=<environment: 0x7fb7ab09ed30> 
+    ##   ..$ colour: language ~factor(cyl)
+    ##   .. ..- attr(*, ".Environment")=<environment: 0x7fb7ab09ed30> 
+    ##   ..- attr(*, "class")= chr "quosures"
+
+``` r
+p
+```
+
+![](gg_files/figure-gfm/unnamed-chunk-3-3.png)<!-- -->

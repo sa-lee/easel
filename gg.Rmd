@@ -220,7 +220,6 @@ but that requires more thought. Coordinate and scale transformations appear to
 be computed using the relevent layer data and need some more thinking about how
 they would be represented using a "graph" tibble.
 
-
 ## Backend agnostic rendering
 
 In principle, the grammar abstracts away the process of defining the graph 
@@ -230,3 +229,36 @@ that determine how the graph should be rendered. The graphic can then actually
 be rendered to a graphics device with a backend library indedpendently. 
 The _plotly_ package uses this logic for turning a _ggplot2_ object into an 
 interactive figure. 
+
+## Implementation thus far
+
+Here's a rough of our grammar currently we have
+three functions:
+
+* visualise (defines what variables to plot)
+* mutate (transform the available aesthetics)
+* draw_ (draw a graphic based on the aesthetics)
+
+```{r}
+library(easel)
+library(magrittr)
+p <- mtcars %>% 
+  visualise(x = hp, y = mpg) %>%
+  draw_points()
+str(p)
+p
+
+p <- mtcars %>% 
+  visualise(x = hp, y = mpg) %>%
+  draw_points(colour = "red")
+
+str(p)
+p
+
+p <- mtcars %>% 
+  visualise(x = hp, y = mpg, colour = factor(cyl)) %>%
+  draw_points(shape = 5) 
+
+str(p)
+p
+```
