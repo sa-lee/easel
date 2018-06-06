@@ -35,7 +35,10 @@ render <- function(.tbl_pl, backend = "ggplot2") {
       geom_fun, mapping = aes_layer, rlang::splice(geom_opts)
     )
     
-    ggplot_eval <- lapply(list(gg_call, layer_call), rlang::eval_tidy)
+    labels <- rlang::call2(
+      "labs", aes_quos
+    )
+    ggplot_eval <- lapply(list(gg_call, layer_call, labels), rlang::eval_tidy)
     
     Reduce("+", ggplot_eval)
   }
