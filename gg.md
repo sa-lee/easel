@@ -319,9 +319,9 @@ str(p)
     ##  $ geom: chr  "point" "point" "point" "point" ...
     ##  - attr(*, "aes")=List of 2
     ##   ..$ x: language ~hp
-    ##   .. ..- attr(*, ".Environment")=<environment: 0x7f8d9a705fb8> 
+    ##   .. ..- attr(*, ".Environment")=<environment: 0x7f8230dda2f0> 
     ##   ..$ y: language ~mpg
-    ##   .. ..- attr(*, ".Environment")=<environment: 0x7f8d9a705fb8> 
+    ##   .. ..- attr(*, ".Environment")=<environment: 0x7f8230dda2f0> 
     ##   ..- attr(*, "class")= chr "quosures"
 
 ``` r
@@ -345,9 +345,9 @@ str(p)
     ##  $ colour: chr  "red" "red" "red" "red" ...
     ##  - attr(*, "aes")=List of 2
     ##   ..$ x: language ~hp
-    ##   .. ..- attr(*, ".Environment")=<environment: 0x7f8d9cec0900> 
+    ##   .. ..- attr(*, ".Environment")=<environment: 0x7f82335bc878> 
     ##   ..$ y: language ~mpg
-    ##   .. ..- attr(*, ".Environment")=<environment: 0x7f8d9cec0900> 
+    ##   .. ..- attr(*, ".Environment")=<environment: 0x7f82335bc878> 
     ##   ..- attr(*, "class")= chr "quosures"
 
 ``` r
@@ -372,11 +372,11 @@ str(p)
     ##  $ shape : num  5 5 5 5 5 5 5 5 5 5 ...
     ##  - attr(*, "aes")=List of 3
     ##   ..$ x     : language ~hp
-    ##   .. ..- attr(*, ".Environment")=<environment: 0x7f8d9a7a4d58> 
+    ##   .. ..- attr(*, ".Environment")=<environment: 0x7f822ea3f220> 
     ##   ..$ y     : language ~mpg
-    ##   .. ..- attr(*, ".Environment")=<environment: 0x7f8d9a7a4d58> 
+    ##   .. ..- attr(*, ".Environment")=<environment: 0x7f822ea3f220> 
     ##   ..$ colour: language ~factor(cyl)
-    ##   .. ..- attr(*, ".Environment")=<environment: 0x7f8d9a7a4d58> 
+    ##   .. ..- attr(*, ".Environment")=<environment: 0x7f822ea3f220> 
     ##   ..- attr(*, "class")= chr "quosures"
 
 ``` r
@@ -384,3 +384,32 @@ p
 ```
 
 ![](gg_files/figure-gfm/unnamed-chunk-3-3.png)<!-- -->
+
+``` r
+# if we update a plot element we override the corresponding aesthetic
+p <- mtcars %>% 
+  visualise(x = hp, y = mpg, colour = factor(cyl)) %>%
+  draw_points(colour = "red") 
+
+str(p)
+```
+
+    ## Classes 'tbl_pl', 'tbl_df', 'tbl' and 'data.frame':  32 obs. of  4 variables:
+    ##  $ x     : num  110 110 93 110 175 105 245 62 95 123 ...
+    ##  $ y     : num  21 21 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 ...
+    ##  $ colour: chr  "red" "red" "red" "red" ...
+    ##  $ geom  : chr  "point" "point" "point" "point" ...
+    ##  - attr(*, "aes")=List of 3
+    ##   ..$ x     : language ~hp
+    ##   .. ..- attr(*, ".Environment")=<environment: 0x7f8230cafb48> 
+    ##   ..$ y     : language ~mpg
+    ##   .. ..- attr(*, ".Environment")=<environment: 0x7f8230cafb48> 
+    ##   ..$ colour: language ~factor(cyl)
+    ##   .. ..- attr(*, ".Environment")=<environment: 0x7f8230cafb48> 
+    ##   ..- attr(*, "class")= chr "quosures"
+
+``` r
+p
+```
+
+![](gg_files/figure-gfm/unnamed-chunk-3-4.png)<!-- -->

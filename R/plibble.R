@@ -3,6 +3,7 @@ visualise <- function(.data, ...) {
   plibble(.data, ...)
 }
 
+aes_plibble <- function(tbl_pl)  attr(tbl_pl, "aes") 
 
 build_plibble <- function(aes_tbl, aes_vars) {
   tibble::new_tibble(

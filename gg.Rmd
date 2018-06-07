@@ -261,4 +261,12 @@ p <- mtcars %>%
 
 str(p)
 p
+
+# if we update a plot element we override the corresponding aesthetic
+p <- mtcars %>% 
+  visualise(x = hp, y = mpg, colour = factor(cyl)) %>%
+  draw_points(colour = "red") 
+
+str(p)
+p
 ```
