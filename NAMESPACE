@@ -2,7 +2,6 @@
 
 S3method(mutate,tbl_pl)
 S3method(plibble,data.frame)
-S3method(print,tbl_pl)
 export(draw_points)
 export(mutate)
 export(plibble)

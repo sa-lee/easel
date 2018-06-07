@@ -1,5 +1,5 @@
 #' @export 
-visualise <- function(.data, ...) {
+visualise <- function(.data, ..., .inherit = TRUE) {
   plibble(.data, ...)
 }
 
@@ -15,11 +15,11 @@ build_plibble <- function(aes_tbl, aes_vars) {
 }
 
 #' @export 
-plibble <- function(.data, ...) { UseMethod("plibble") }
+plibble <- function(.data, ..., .inherit = TRUE) { UseMethod("plibble") }
 
 #' @method plibble data.frame
 #' @export 
-plibble.data.frame <- function(.data, ...) {
+plibble.data.frame <- function(.data, ..., .inherit = TRUE) {
   aes_vars <- rlang::enquos(..., .named = TRUE)
   aes_names <- rlang::syms(names(aes_vars))
   # need to include checks for validity here
@@ -28,9 +28,15 @@ plibble.data.frame <- function(.data, ...) {
   build_plibble(.data, aes_vars)
 }
 
-plibble.tbl_pl <- function(.data, ...) {
+plibble.tbl_pl <- function(.data, ..., .inherit = TRUE) {
+  aes_vars <- rlang::enquos(..., .named = TRUE)
+  if (.inherit) {
+    aes_vars <- c(attr(.data, "aes"), aes_vars)
+  } 
   layer_list <- plibble_list(list(.data)) 
-  layer_list[[2]] <- plibble(.data, ...)
+  class(.data) <- c("tbl_df", "tbl", "data.frame")
+  layer_list[[2]] <- plibble(dplyr::select(.data, -aes),  
+                             rlang::UQS(aes_vars))
   layer_list
 }
 
@@ -38,8 +44,8 @@ is_plibble <- function(x) inherits(x, "tbl_pl")
 
 # a list of layers ...
 plibble_list <- function(x) {
-  all_pl <- all(vapply(x, is_plibble, logical(1)))
-  stopifnot(all_pl, is.list(x))
+  stopifnot(all(vapply(x, is_plibble, logical(1))),
+            is.list(x))
   structure(x, class = "tbl_pl_list", names = names(x))
 }
 

@@ -26,7 +26,6 @@ render_layer <- function(x) {
   # for some weird reason `aes`` takes x, and y as it's first arguments
   # so we need to splice those out
   aes_current <- get_aes(x)
-  print(aes_current)
   if (any(aes_current %in% "x")) .x <- rlang::sym("x")
   if (any(aes_current %in% "y"))  .y <- rlang::sym("y")
   leftovers <- setdiff(aes_current, c("x", "y"))
