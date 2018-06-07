@@ -5,19 +5,13 @@ dplyr::mutate
 
 #' @method mutate tbl_pl
 #' @export
-mutate.tbl_pl <- function(.data, ..., update_aes = FALSE) {
+mutate.tbl_pl <- function(.data, ...) {
   update <- NextMethod()
-  aes <- attr(.data, "aes")
-  if (update_aes) {
-    aes_new <- rlang::enquos(..., .named = TRUE)
-    update <- intersect(names(aes), names(aes_new))
-    if (length(update) == 0L) {
-      aes <- rlang::quos(rlang::UQS(aes), rlang::UQS(aes_new))
-    } else {
-      aes_old <- aes[setdiff(names(aes), names(aes_new))]
-      aes <- rlang::quos(rlang::UQS(aes_old), rlang::UQS(aes_new))
-    }
-  }
-  build_plibble(update, aes)
+  build_plibble(update, attr(.data, "aes_vars"))
 }
 
+mutate.tbl_pl_list <- function(.data, ...) {
+  stack_pos <- length(.data)
+  .data[[stack_pos]] <- mutate(.data[[stack_pos]], ...)
+  .data
+}

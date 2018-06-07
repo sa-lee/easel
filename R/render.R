@@ -1,45 +1,47 @@
 # rendering function
+render <- function(x) {
+  UseMethod("render")
+}
 
-render <- function(.tbl_pl, backend = "ggplot2") {
+render.tbl_pl <- function(x) {
+  gg_call <- rlang::call2("ggplot", .ns = "ggplot2")
+  layer_call <- render_layer(x)
+  rlang::eval_tidy(gg_call) + rlang::eval_tidy(layer_call)
+}
+
+render_layer <- function(x) {
   
-  aes_quos <- attr(.tbl_pl, "aes")
-  aes_cols <- names(aes_quos)
-  if (length(.tbl_pl[["geom"]]) == 0L) {
+  if (length(x[["geom"]]) == 0L) {
     geom <- "blank"
+    geom_opts <- list()
   } else {
-    geom <- unique(.tbl_pl[["geom"]])
-    geom_opts <- dplyr::select(.tbl_pl,
-                               -c(aes_cols, "geom"))
-    geom_opts <- dplyr::distinct(geom_opts)
-    geom_opts <- rlang::as_list(geom_opts)
+    geom <- x[["geom"]][1]
+    geom_opts <- x[["opts"]][[1]]
+    if (length(geom_opts) == 0) {
+      geom_opts <- list()
+    } else {
+      geom_opts <- rlang::as_list(geom_opts)
+    }
   }
-  
   # for some weird reason `aes`` takes x, and y as it's first arguments
   # so we need to splice those out
-
-  if (!rlang::is_empty(aes_quos[["x"]])) x <- rlang::sym("x")
-  if (!rlang::is_empty(aes_quos[["y"]]))  y <- rlang::sym("y")
-  leftovers <- setdiff(names(aes_quos), c("x", "y"))
+  aes_current <- get_aes(x)
+  print(aes_current)
+  if (any(aes_current %in% "x")) .x <- rlang::sym("x")
+  if (any(aes_current %in% "y"))  .y <- rlang::sym("y")
+  leftovers <- setdiff(aes_current, c("x", "y"))
   aes_dots <- rlang::syms(leftovers)
   names(aes_dots) <-  leftovers
-  if (backend == "ggplot2") {
-    loadNamespace("ggplot2")
-    geom_fun <- match.fun(paste0("geom_", geom))
-    aes_layer <- aes(rlang::UQ(x), rlang::UQ(y), rlang::UQS(aes_dots))
-    
-    gg_call <- rlang::call2(
-      "ggplot", data = .tbl_pl
-    )
-    
-    layer_call <- rlang::call2(
-      geom_fun, mapping = aes_layer, rlang::splice(geom_opts)
-    )
-    
-    labels <- rlang::call2(
-      "labs", aes_quos
-    )
-    ggplot_eval <- lapply(list(gg_call, layer_call, labels), rlang::eval_tidy)
-    
-    Reduce("+", ggplot_eval)
-  }
+  aes_layer <- ggplot2::aes(rlang::UQ(.x), rlang::UQ(.y), rlang::UQS(aes_dots))
+  
+  geom_fun <- paste0("geom_", geom)
+  layer_call <- rlang::call2(
+    geom_fun, 
+    data = get_layer_data(x),
+    mapping = aes_layer, 
+    rlang::splice(geom_opts),
+    .ns = "ggplot2"
+  )
+  
+  layer_call
 }
