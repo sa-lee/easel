@@ -299,33 +299,38 @@ logic for turning a *ggplot2* object into an interactive figure.
 Here’s a rough of our grammar currently we have three functions:
 
   - visualise (defines what variables to plot)
-  - mutate (transform the available aesthetics)
+  - summarise\_ (aggregates or transforms the plot data based on
+    aesthetics)
   - draw\_ (draw a graphic based on the aesthetics)
 
-<!-- end list -->
+We create plots layer by layer so the following occurs: - a layer is a
+single graphical pipeline - each layer has a root node which is the data
+- each layer is independent (so aesthetics need to be specified for each
+layer) - once a plot is ready each layer can be meshed then rendered
 
 ``` r
 library(easel)
+# simple scatter plot
 library(magrittr)
 p <- mtcars %>% 
   visualise(x = hp, y = mpg) %>%
   draw_points()
-str(p)
+head(p)
 ```
 
-    ## Classes 'tbl_pl', 'tbl_df', 'tbl' and 'data.frame':  32 obs. of  3 variables:
-    ##  $ x   : num  110 110 93 110 175 105 245 62 95 123 ...
-    ##  $ y   : num  21 21 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 ...
-    ##  $ geom: chr  "point" "point" "point" "point" ...
-    ##  - attr(*, "aes")=List of 2
-    ##   ..$ x: language ~hp
-    ##   .. ..- attr(*, ".Environment")=<environment: 0x7f8230dda2f0> 
-    ##   ..$ y: language ~mpg
-    ##   .. ..- attr(*, ".Environment")=<environment: 0x7f8230dda2f0> 
-    ##   ..- attr(*, "class")= chr "quosures"
+    ## # A tibble: 6 x 13
+    ##     mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb aes   
+    ##   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <list>
+    ## 1  21       6   160   110  3.9   2.62  16.5     0     1     4     4 <tibb…
+    ## 2  21       6   160   110  3.9   2.88  17.0     0     1     4     4 <tibb…
+    ## 3  22.8     4   108    93  3.85  2.32  18.6     1     1     4     1 <tibb…
+    ## 4  21.4     6   258   110  3.08  3.22  19.4     1     0     3     1 <tibb…
+    ## 5  18.7     8   360   175  3.15  3.44  17.0     0     0     3     2 <tibb…
+    ## 6  18.1     6   225   105  2.76  3.46  20.2     1     0     3     1 <tibb…
+    ## # ... with 1 more variable: geom <chr>
 
 ``` r
-p
+render(p)
 ```
 
 ![](gg_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
@@ -335,23 +340,22 @@ p <- mtcars %>%
   visualise(x = hp, y = mpg) %>%
   draw_points(colour = "red")
 
-str(p)
+head(p)
 ```
 
-    ## Classes 'tbl_pl', 'tbl_df', 'tbl' and 'data.frame':  32 obs. of  4 variables:
-    ##  $ x     : num  110 110 93 110 175 105 245 62 95 123 ...
-    ##  $ y     : num  21 21 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 ...
-    ##  $ geom  : chr  "point" "point" "point" "point" ...
-    ##  $ colour: chr  "red" "red" "red" "red" ...
-    ##  - attr(*, "aes")=List of 2
-    ##   ..$ x: language ~hp
-    ##   .. ..- attr(*, ".Environment")=<environment: 0x7f82335bc878> 
-    ##   ..$ y: language ~mpg
-    ##   .. ..- attr(*, ".Environment")=<environment: 0x7f82335bc878> 
-    ##   ..- attr(*, "class")= chr "quosures"
+    ## # A tibble: 6 x 14
+    ##     mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb aes   
+    ##   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <list>
+    ## 1  21       6   160   110  3.9   2.62  16.5     0     1     4     4 <tibb…
+    ## 2  21       6   160   110  3.9   2.88  17.0     0     1     4     4 <tibb…
+    ## 3  22.8     4   108    93  3.85  2.32  18.6     1     1     4     1 <tibb…
+    ## 4  21.4     6   258   110  3.08  3.22  19.4     1     0     3     1 <tibb…
+    ## 5  18.7     8   360   175  3.15  3.44  17.0     0     0     3     2 <tibb…
+    ## 6  18.1     6   225   105  2.76  3.46  20.2     1     0     3     1 <tibb…
+    ## # ... with 2 more variables: geom <chr>, opts <list>
 
 ``` r
-p
+render(p)
 ```
 
 ![](gg_files/figure-gfm/unnamed-chunk-3-2.png)<!-- -->
@@ -361,26 +365,22 @@ p <- mtcars %>%
   visualise(x = hp, y = mpg, colour = factor(cyl)) %>%
   draw_points(shape = 5) 
 
-str(p)
+head(p)
 ```
 
-    ## Classes 'tbl_pl', 'tbl_df', 'tbl' and 'data.frame':  32 obs. of  5 variables:
-    ##  $ x     : num  110 110 93 110 175 105 245 62 95 123 ...
-    ##  $ y     : num  21 21 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 ...
-    ##  $ colour: Factor w/ 3 levels "4","6","8": 2 2 1 2 3 2 3 1 1 2 ...
-    ##  $ geom  : chr  "point" "point" "point" "point" ...
-    ##  $ shape : num  5 5 5 5 5 5 5 5 5 5 ...
-    ##  - attr(*, "aes")=List of 3
-    ##   ..$ x     : language ~hp
-    ##   .. ..- attr(*, ".Environment")=<environment: 0x7f822ea3f220> 
-    ##   ..$ y     : language ~mpg
-    ##   .. ..- attr(*, ".Environment")=<environment: 0x7f822ea3f220> 
-    ##   ..$ colour: language ~factor(cyl)
-    ##   .. ..- attr(*, ".Environment")=<environment: 0x7f822ea3f220> 
-    ##   ..- attr(*, "class")= chr "quosures"
+    ## # A tibble: 6 x 14
+    ##     mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb aes   
+    ##   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <list>
+    ## 1  21       6   160   110  3.9   2.62  16.5     0     1     4     4 <tibb…
+    ## 2  21       6   160   110  3.9   2.88  17.0     0     1     4     4 <tibb…
+    ## 3  22.8     4   108    93  3.85  2.32  18.6     1     1     4     1 <tibb…
+    ## 4  21.4     6   258   110  3.08  3.22  19.4     1     0     3     1 <tibb…
+    ## 5  18.7     8   360   175  3.15  3.44  17.0     0     0     3     2 <tibb…
+    ## 6  18.1     6   225   105  2.76  3.46  20.2     1     0     3     1 <tibb…
+    ## # ... with 2 more variables: geom <chr>, opts <list>
 
 ``` r
-p
+render(p)
 ```
 
 ![](gg_files/figure-gfm/unnamed-chunk-3-3.png)<!-- -->
@@ -391,25 +391,66 @@ p <- mtcars %>%
   visualise(x = hp, y = mpg, colour = factor(cyl)) %>%
   draw_points(colour = "red") 
 
-str(p)
+head(p)
 ```
 
-    ## Classes 'tbl_pl', 'tbl_df', 'tbl' and 'data.frame':  32 obs. of  4 variables:
-    ##  $ x     : num  110 110 93 110 175 105 245 62 95 123 ...
-    ##  $ y     : num  21 21 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 ...
-    ##  $ colour: chr  "red" "red" "red" "red" ...
-    ##  $ geom  : chr  "point" "point" "point" "point" ...
-    ##  - attr(*, "aes")=List of 3
-    ##   ..$ x     : language ~hp
-    ##   .. ..- attr(*, ".Environment")=<environment: 0x7f8230cafb48> 
-    ##   ..$ y     : language ~mpg
-    ##   .. ..- attr(*, ".Environment")=<environment: 0x7f8230cafb48> 
-    ##   ..$ colour: language ~factor(cyl)
-    ##   .. ..- attr(*, ".Environment")=<environment: 0x7f8230cafb48> 
-    ##   ..- attr(*, "class")= chr "quosures"
+    ## # A tibble: 6 x 14
+    ##     mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb aes   
+    ##   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <list>
+    ## 1  21       6   160   110  3.9   2.62  16.5     0     1     4     4 <tibb…
+    ## 2  21       6   160   110  3.9   2.88  17.0     0     1     4     4 <tibb…
+    ## 3  22.8     4   108    93  3.85  2.32  18.6     1     1     4     1 <tibb…
+    ## 4  21.4     6   258   110  3.08  3.22  19.4     1     0     3     1 <tibb…
+    ## 5  18.7     8   360   175  3.15  3.44  17.0     0     0     3     2 <tibb…
+    ## 6  18.1     6   225   105  2.76  3.46  20.2     1     0     3     1 <tibb…
+    ## # ... with 2 more variables: geom <chr>, opts <list>
 
 ``` r
-p
+render(p)
 ```
 
 ![](gg_files/figure-gfm/unnamed-chunk-3-4.png)<!-- -->
+
+## Multi layer plots
+
+In order to produce multiple layers on the same plot we produce a list
+of plot tibbles via the *mesh* verb:
+
+``` r
+p1 <- mtcars %>% 
+  visualise(x = hp, y = mpg) %>%
+  draw_points()
+
+p2 <- mtcars %>%
+  visualise(x = hp, y = mpg, colour = factor(cyl)) %>%
+  summarise_mean_2d() %>%
+  draw_points(size = 5)
+
+layers <- mesh(p1,p2)
+
+render(layers)
+```
+
+![](gg_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+
+``` r
+p1 <- mtcars %>%
+  visualise(x = hp, y = mpg, colour = factor(cyl)) %>%
+  draw_points()
+
+# regression line through all points
+p2 <- mtcars %>% 
+  visualise(x = hp, y = mpg) %>%
+  summarise_lm() %>%
+  draw_lines()
+
+# regression line by factor all points
+p3 <- mtcars %>% 
+  visualise(x = hp, y = mpg, colour = factor(cyl)) %>%
+  summarise_lm() %>%
+  draw_lines()
+layers <- mesh(p1, p2, p3)
+render(layers)
+```
+
+![](gg_files/figure-gfm/unnamed-chunk-4-2.png)<!-- -->
