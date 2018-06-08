@@ -1,12 +1,30 @@
 # rendering function
+#' @export
 render <- function(x) {
   UseMethod("render")
 }
 
+#' @export
 render.tbl_pl <- function(x) {
   gg_call <- rlang::call2("ggplot", .ns = "ggplot2")
   layer_call <- render_layer(x)
-  rlang::eval_tidy(gg_call) + rlang::eval_tidy(layer_call)
+  aes_quos <- attr(x, "aes_vars")
+  labels <- rlang::call2("labs", aes_quos, .ns = "ggplot2")
+  rlang::eval_tidy(gg_call) + rlang::eval_tidy(layer_call) + rlang::eval_tidy(labels)
+}
+
+#' @export
+render.tbl_pl_list <- function(x) {
+  
+  gg_call <- rlang::call2("ggplot", .ns = "ggplot2")
+  layer_calls <- lapply(x, render_layer)
+  all_labs <- lapply(x, function(.) attr(., "aes_vars"))
+  max_labs <- which.max(lengths(all_labs))
+  aes_quos <- all_labs[[max_labs]]
+  labels <- rlang::call2("labs", aes_quos, .ns = "ggplot2")
+  layer_eval <- Reduce("+", lapply(c(gg_call, layer_calls, labels), 
+                                   rlang::eval_tidy))
+  layer_eval
 }
 
 render_layer <- function(x) {
