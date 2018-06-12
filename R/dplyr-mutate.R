@@ -7,5 +7,5 @@ dplyr::mutate
 #' @export
 mutate.tbl_pl <- function(.data, ...) {
   update <- NextMethod()
-  build_plibble(update, attr(.data, "aes_vars"))
+  update_plibble(update, get_mapping(.data))
 }

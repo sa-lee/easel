@@ -245,6 +245,8 @@ We create plots layer by layer so the following occurs:
 - each layer is independent (so aesthetics need to be specified for each layer)
 - once a plot is ready each layer can be meshed then rendered
 
+Each plot is lazily created (the input tibble is only modified upon rendering)
+
 ```{r}
 library(easel)
 # simple scatter plot
@@ -252,7 +254,8 @@ library(magrittr)
 p <- mtcars %>% 
   visualise(x = hp, y = mpg) %>%
   draw_points()
-head(p)
+# the pipeline 
+names(attr(p, "pipeline"))
 render(p)
 
 
@@ -260,21 +263,14 @@ p <- mtcars %>%
   visualise(x = hp, y = mpg) %>%
   draw_points(colour = "red")
 
-head(p)
+# the pipeline 
+names(attr(p, "pipeline"))
 render(p)
 
 p <- mtcars %>% 
   visualise(x = hp, y = mpg, colour = factor(cyl)) %>%
   draw_points(shape = 5) 
-
-head(p)
-render(p)
-# if we update a plot element we override the corresponding aesthetic
-p <- mtcars %>% 
-  visualise(x = hp, y = mpg, colour = factor(cyl)) %>%
-  draw_points(colour = "red") 
-
-head(p)
+names(attr(p, "pipeline"))
 render(p)
 ```
 
@@ -296,23 +292,5 @@ p2 <- mtcars %>%
 
 layers <- mesh(p1,p2)
 
-render(layers)
-
-p1 <- mtcars %>%
-  visualise(x = hp, y = mpg, colour = factor(cyl)) %>%
-  draw_points()
-
-# regression line through all points
-p2 <- mtcars %>% 
-  visualise(x = hp, y = mpg) %>%
-  summarise_lm() %>%
-  draw_lines()
-
-# regression line by factor all points
-p3 <- mtcars %>% 
-  visualise(x = hp, y = mpg, colour = factor(cyl)) %>%
-  summarise_lm() %>%
-  draw_lines()
-layers <- mesh(p1, p2, p3)
 render(layers)
 ```

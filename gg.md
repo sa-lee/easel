@@ -308,6 +308,9 @@ single graphical pipeline - each layer has a root node which is the data
 - each layer is independent (so aesthetics need to be specified for each
 layer) - once a plot is ready each layer can be meshed then rendered
 
+Each plot is lazily created (the input tibble is only modified upon
+rendering)
+
 ``` r
 library(easel)
 # simple scatter plot
@@ -315,19 +318,11 @@ library(magrittr)
 p <- mtcars %>% 
   visualise(x = hp, y = mpg) %>%
   draw_points()
-head(p)
+# the pipeline 
+names(attr(p, "pipeline"))
 ```
 
-    ## # A tibble: 6 x 13
-    ##     mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb aes   
-    ##   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <list>
-    ## 1  21       6   160   110  3.9   2.62  16.5     0     1     4     4 <tibb…
-    ## 2  21       6   160   110  3.9   2.88  17.0     0     1     4     4 <tibb…
-    ## 3  22.8     4   108    93  3.85  2.32  18.6     1     1     4     1 <tibb…
-    ## 4  21.4     6   258   110  3.08  3.22  19.4     1     0     3     1 <tibb…
-    ## 5  18.7     8   360   175  3.15  3.44  17.0     0     0     3     2 <tibb…
-    ## 6  18.1     6   225   105  2.76  3.46  20.2     1     0     3     1 <tibb…
-    ## # ... with 1 more variable: geom <chr>
+    ## [1] "visualise"   "draw_points"
 
 ``` r
 render(p)
@@ -340,19 +335,11 @@ p <- mtcars %>%
   visualise(x = hp, y = mpg) %>%
   draw_points(colour = "red")
 
-head(p)
+# the pipeline 
+names(attr(p, "pipeline"))
 ```
 
-    ## # A tibble: 6 x 14
-    ##     mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb aes   
-    ##   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <list>
-    ## 1  21       6   160   110  3.9   2.62  16.5     0     1     4     4 <tibb…
-    ## 2  21       6   160   110  3.9   2.88  17.0     0     1     4     4 <tibb…
-    ## 3  22.8     4   108    93  3.85  2.32  18.6     1     1     4     1 <tibb…
-    ## 4  21.4     6   258   110  3.08  3.22  19.4     1     0     3     1 <tibb…
-    ## 5  18.7     8   360   175  3.15  3.44  17.0     0     0     3     2 <tibb…
-    ## 6  18.1     6   225   105  2.76  3.46  20.2     1     0     3     1 <tibb…
-    ## # ... with 2 more variables: geom <chr>, opts <list>
+    ## [1] "visualise"   "draw_points"
 
 ``` r
 render(p)
@@ -364,52 +351,16 @@ render(p)
 p <- mtcars %>% 
   visualise(x = hp, y = mpg, colour = factor(cyl)) %>%
   draw_points(shape = 5) 
-
-head(p)
+names(attr(p, "pipeline"))
 ```
 
-    ## # A tibble: 6 x 14
-    ##     mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb aes   
-    ##   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <list>
-    ## 1  21       6   160   110  3.9   2.62  16.5     0     1     4     4 <tibb…
-    ## 2  21       6   160   110  3.9   2.88  17.0     0     1     4     4 <tibb…
-    ## 3  22.8     4   108    93  3.85  2.32  18.6     1     1     4     1 <tibb…
-    ## 4  21.4     6   258   110  3.08  3.22  19.4     1     0     3     1 <tibb…
-    ## 5  18.7     8   360   175  3.15  3.44  17.0     0     0     3     2 <tibb…
-    ## 6  18.1     6   225   105  2.76  3.46  20.2     1     0     3     1 <tibb…
-    ## # ... with 2 more variables: geom <chr>, opts <list>
+    ## [1] "visualise"   "draw_points"
 
 ``` r
 render(p)
 ```
 
 ![](gg_files/figure-gfm/unnamed-chunk-3-3.png)<!-- -->
-
-``` r
-# if we update a plot element we override the corresponding aesthetic
-p <- mtcars %>% 
-  visualise(x = hp, y = mpg, colour = factor(cyl)) %>%
-  draw_points(colour = "red") 
-
-head(p)
-```
-
-    ## # A tibble: 6 x 14
-    ##     mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb aes   
-    ##   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <list>
-    ## 1  21       6   160   110  3.9   2.62  16.5     0     1     4     4 <tibb…
-    ## 2  21       6   160   110  3.9   2.88  17.0     0     1     4     4 <tibb…
-    ## 3  22.8     4   108    93  3.85  2.32  18.6     1     1     4     1 <tibb…
-    ## 4  21.4     6   258   110  3.08  3.22  19.4     1     0     3     1 <tibb…
-    ## 5  18.7     8   360   175  3.15  3.44  17.0     0     0     3     2 <tibb…
-    ## 6  18.1     6   225   105  2.76  3.46  20.2     1     0     3     1 <tibb…
-    ## # ... with 2 more variables: geom <chr>, opts <list>
-
-``` r
-render(p)
-```
-
-![](gg_files/figure-gfm/unnamed-chunk-3-4.png)<!-- -->
 
 ## Multi layer plots
 
@@ -431,26 +382,6 @@ layers <- mesh(p1,p2)
 render(layers)
 ```
 
+    ## [1] "tbl_pl"     "tbl_df"     "tbl"        "data.frame"
+
 ![](gg_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
-
-``` r
-p1 <- mtcars %>%
-  visualise(x = hp, y = mpg, colour = factor(cyl)) %>%
-  draw_points()
-
-# regression line through all points
-p2 <- mtcars %>% 
-  visualise(x = hp, y = mpg) %>%
-  summarise_lm() %>%
-  draw_lines()
-
-# regression line by factor all points
-p3 <- mtcars %>% 
-  visualise(x = hp, y = mpg, colour = factor(cyl)) %>%
-  summarise_lm() %>%
-  draw_lines()
-layers <- mesh(p1, p2, p3)
-render(layers)
-```
-
-![](gg_files/figure-gfm/unnamed-chunk-4-2.png)<!-- -->

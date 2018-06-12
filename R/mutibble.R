@@ -1,7 +1,7 @@
 #' A mutable tibble
 #' 
 #'
-#'  
+
 .mutibble <- function(.data) {
   # create a data mask with active bindings from the top environment
   mask <- rlang::as_data_mask(.data, parent = rlang::empty_env())

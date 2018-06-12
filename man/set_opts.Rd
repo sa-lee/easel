@@ -5,13 +5,12 @@
 \title{The API for drawing is quite simple:
 It takes a plot tibble and appends a graphical primitive + 
 any additional options to to the plot, layers are then built
-up using bind.}
+up using mesh.}
 \usage{
-set_opts(.data, ..., geom)
+set_opts(.data, opts, geom)
 }
 \description{
-The API for drawing is quite simple:
-It takes a plot tibble and appends a graphical primitive + 
-any additional options to to the plot, layers are then built
-up using bind.
+How to handle when options that overlap aesthetics?  
+ 1. Throw a warning/message?
+ 2. overwrite it?
 }

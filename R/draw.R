@@ -1,22 +1,37 @@
 #' The API for drawing is quite simple:
 #' It takes a plot tibble and appends a graphical primitive + 
 #' any additional options to to the plot, layers are then built
-#' up using bind. 
-
-set_opts <- function(.data, ..., geom) {
-  point_opts <- rlang::dots_list(...)
-  if (rlang::is_empty(point_opts)) {
+#' up using mesh.
+#' 
+#'  How to handle when options that overlap aesthetics?  
+#'  1. Throw a warning/message?
+#'  2. overwrite it?
+set_opts <- function(.data, opts, geom) {
+  
+  if (rlang::is_empty(opts)) {
     mutate(.data, geom = rlang::UQ(geom))
   } else {
-    # override aes if point opts coincide with it
-    current_aes <- get_aes(.data)
-    is_overlap <- names(current_aes) %in% names(point_opts)
+    # override aes if  opts coincide with it
+    current_aes <- get_mapping(.data)
+    is_overlap <- names(opts) %in% names(current_aes)
     if (any(is_overlap)) {
-      current_aes <- current_aes[!is_overlap]
-      .data <- build_plibble(.data, current_aes)
+      message("updating aesthetics...")
+      names(opts[is_overlap]) <- paste0("aes_", names(opts[is_overlap]))
     }
-    mutate(.data, geom = rlang::UQ(geom), opts = list(point_opts))
+    names(opts)[!is_overlap] <- paste0("opts_", names(opts)[!is_overlap])
+    mutate(.data, geom = rlang::UQ(geom), rlang::UQS(opts))
   }
+}
+
+draw_call <- function(.data, ..., geom) {
+  opts <- rlang::dots_list(...)
+  opts_fun <- set_opts
+  if (length(opts) > 0) {
+    fn_fmls(opts_fun)[c(2,3)] <- list(opts = opts, geom = geom)
+  } else {
+    fn_fmls(opts_fun)[c(2,3)] <- list(opts = list(), geom = geom)
+  }
+  opts_fun
 }
 
 #' @export
@@ -25,7 +40,8 @@ draw_points <- function(.data, ...) UseMethod("draw_points")
 #' probably could hard code options here
 #' @export
 draw_points.tbl_pl <- function(.data, ...) {
-  set_opts(.data, ..., geom = "point")
+  fun <- draw_call(.data, ..., geom = "point")
+  set_pipeline(.data, list(draw_points = fun))
 }
 
 #'@export
@@ -33,6 +49,7 @@ draw_lines <- function(.data, ...) UseMethod("draw_lines")
 
 #' @export
 draw_lines.tbl_pl <- function(.data, ...) {
-  set_opts(.data, ..., geom = "line")
+  fun <- draw_call(.data, ..., geom = "line")
+  set_pipeline(.data, list(draw_points = fun))
 }
 
