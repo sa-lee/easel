@@ -50,6 +50,15 @@ draw_lines <- function(.data, ...) UseMethod("draw_lines")
 #' @export
 draw_lines.tbl_pl <- function(.data, ...) {
   fun <- draw_call(.data, ..., geom = "line")
-  set_pipeline(.data, list(draw_points = fun))
+  set_pipeline(.data, list(draw_lines = fun))
 }
 
+
+#'@export
+draw_rect <- function(.data, ...) UseMethod("draw_rect")
+
+#' @export
+draw_rect.tbl_pl <- function(.data, ...) {
+  fun <- draw_call(.data, ..., geom = "rect")
+  set_pipeline(.data, list(draw_rect = fun))
+}

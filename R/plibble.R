@@ -26,7 +26,8 @@ is_plibble <- function(x) inherits(x, "tbl_pl")
 #' @export
 get_mapping <- function(x) { attr(x, "mapping") }
 set_mapping <- function(x, mapping) { 
-  attr(x, "mapping") <- mapping 
+  current <- get_mapping(x)
+  attr(x, "mapping") <- c(current, mapping)
   x
 }
 

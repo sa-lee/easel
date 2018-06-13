@@ -36,10 +36,10 @@ eval_pipeline <- function(x) {
 }
 
 render_layer <- function(x) {
-  aes_current <- names(get_mapping(x))
   x <- eval_pipeline(x)
-  plot_data <- dplyr::select(x, dplyr::starts_with("aes"))
-
+  plot_data <- dplyr::select(x, dplyr::starts_with("aes_"))
+  aes_current <- sub("aes_", "", names(plot_data))
+  
   if (length(x[["geom"]]) == 0L) {
     geom <- "blank"
     geom_opts <- list()
@@ -55,8 +55,16 @@ render_layer <- function(x) {
   }
   # for some weird reason `aes`` takes x, and y as it's first arguments
   # so we need to splice those out
-  if (any(aes_current %in% "x")) .x <- rlang::sym("aes_x")
-  if (any(aes_current %in% "y"))  .y <- rlang::sym("aes_y")
+  if (any(aes_current %in% "x")) {
+    .x <- rlang::sym("aes_x")
+  } else {
+    .x <- NULL
+  }
+  if (any(aes_current %in% "y")) {
+    .y <- rlang::sym("aes_y")
+  } else {
+    .y <- NULL
+  }
   leftovers <- setdiff(aes_current, c("x", "y"))
   if (length(leftovers)) {
     aes_dots <- rlang::syms(paste0("aes_", leftovers))
@@ -64,7 +72,8 @@ render_layer <- function(x) {
   } else {
     aes_dots <- list()
   }
-
+  
+  
   aes_layer <- ggplot2::aes(rlang::UQ(.x), rlang::UQ(.y), rlang::UQS(aes_dots))
   
   geom_fun <- paste0("geom_", geom)
