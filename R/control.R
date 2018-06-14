@@ -1,36 +1,65 @@
-#' Idea for interactive elements
-#' - place the layers data into a reactive data.frame
-#' - this adds an event column to the plot data frame
-#' - the event plus data 
-control_press <- function(.data) {
-  fun = function(.data, .press) {
-    if (missing(.press)) {
-      mutate(.data, event = "press")
+# Control triggers some kind of event to be placed into a mutibble:
+#  - first we pin a data frame down creating a mutable table
+# this stores the table and a reference to itself, any downstream operations
+# get evaluated in the reference
+# p <- pin(mtcars)
+# 
+# define a scatter plot
+# scatter <- p %>% 
+#           visualise(x = mpg, y = wt) %>% 
+#           draw_points()
+# # a click event, adds a column called is_clicked
+# when is_clicked is TRUE , the mutibble has the value colour = "red" inserted
+# into it.
+# control_click() 
+# clicker_highlight <- p %>%
+#   control_click() %>%
+#   filter(is_clicked) %>%
+#   put_vals(colour = "red", t = .)
+# 
+# an interactive graphic, p contains all the information necessary to build
+# a plot
+# render(p)
+
+control_click <- function(.data) {
+  fun = function(.data, .input = NULL) {
+    if (length(.input) > 0) {
+      mapping_x <- rlang::sym(.input$mapping[["x"]])
+      mapping_y <- rlang::sym(.input$mapping[["y"]])
+      values_x <- .input$x
+      values_y <- .input$y
+      filter_x <- rlang::quo(dplyr::near(rlang::UQ(mapping_x), 
+                                         rlang::UQ(values_x), 
+                                         tol = 0.1))
+      filter_y <- rlang::quo(dplyr::near(rlang::UQ(mapping_y),
+                                         rlang::UQ(values_y),
+                                         tol = 0.1))
+      dplyr::mutate(.data, is_clicked = rlang::UQ(filter_x) && rlang::UQ(filter_y))
     } else {
-      message("hello")
+      dplyr::mutate(.data, is_clicked = FALSE)
     }
   }
   set_pipeline(.data, list(control_press = fun))
+}
+
+push_up <- function(.data, event) {
+  pipeline <- get_pipeline(.data)
   
 }
 
+render_shiny <- function(x) {
 
-shiny_render <- function(x) {
-  events <- Filter(function(.x) colnames(.x) %in% "event", x)
-  
   require(shiny)
   ui <- basicPage(
-    plotOutput("plot1", click = "plot_pressed"),
-    verbatimTextOutput("info")
+    plotOutput("plot1")
   )
   
   server <- function(input, output) {
     
-    data <- reactive({
-      eval_pipeline(x)
-    })
+    data <- reactive(x)
+    
     output$plot1 <- renderPlot({
-      ggplot(mtcars, aes(x=wt, y=mpg)) + geom_point()
+      render(data())
     })
 
   }
