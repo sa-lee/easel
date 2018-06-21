@@ -3,8 +3,6 @@ Genomic semantics for graphics
 Stuart Lee
 19/06/2018
 
-# Genomic semantics for graphics
-
 There are many current gaps in methodology for visualising (and
 performing exploratory data analysis of) high-throughput genomic
 datasets. These issues relate to both the technical nature and
@@ -115,6 +113,12 @@ exceptions are:
     allows a user to search for the favourite gene.
 
 The latter three software suites are closed source.
+
+From the info vis community there has been a few efforts for modifying
+t-SNE for larger datasets, in what has been called hierachical SNE
+(hSNE), the relevant publications are
+<https://www.nature.com/articles/s41467-017-01689-9> and
+<https://cyteguide.cytosplore.org/assets/files/vis2017_hollt_cyteguide.pdf>
 
 # Gaps
 
