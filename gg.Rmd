@@ -239,6 +239,7 @@ three functions:
 * summarise_ (aggregates or transforms the plot data based on aesthetics)
 * draw_ (draw a graphic based on the aesthetics)
 
+
 We create plots layer by layer so the following occurs:
 - a layer is a single graphical pipeline
 - each layer has a root node which is the data
