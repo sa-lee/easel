@@ -1,4 +1,1 @@
 get_quos_names <- function(quos) vapply(quos, rlang::quo_name, character(1))
-
-#' @import rlang
-NULL
