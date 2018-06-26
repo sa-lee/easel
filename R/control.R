@@ -20,6 +20,9 @@
 # an interactive graphic, p contains all the information necessary to build
 # a plot
 # render(p)
+control_click <- function(.data) UseMethod("control_click") 
+
+
 control_click <- function(.data) {
   fun = function(.data, .input = NULL) {
     if (length(.input) > 0) {

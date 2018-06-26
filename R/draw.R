@@ -44,6 +44,11 @@ draw_points.tbl_pl <- function(.data, ...) {
   set_pipeline(.data, list(draw_points = fun))
 }
 
+draw_points.mutibble <- function(.data, ...) {
+  .data$.tbl <- draw_points(.data$.tbl, ... )
+  .data
+}
+
 #'@export
 draw_lines <- function(.data, ...) UseMethod("draw_lines")
 

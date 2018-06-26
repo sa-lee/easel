@@ -11,6 +11,10 @@
 #'
 pin <- function(.data) { UseMethod("pin") }
 
+pin.default <- function(.data) {
+  new_mutibble(tibble::as_tibble(.data))
+}
+
 pin.tbl_df <- function(.data) {
   new_mutibble(.data)
 }
