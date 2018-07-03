@@ -14,14 +14,12 @@
 # control_click() 
 # clicker_highlight <- p %>%
 #   control_click() %>%
-#   filter(is_clicked) %>%
-#   put_vals(colour = "red", t = .)
+#   put(colour = "red")
 # 
 # an interactive graphic, p contains all the information necessary to build
 # a plot
 # render(p)
 control_click <- function(.data) UseMethod("control_click") 
-
 
 control_click <- function(.data) {
   fun = function(.data, .input = NULL) {
@@ -33,38 +31,45 @@ control_click <- function(.data) {
       values_y <- .input$y
       filter_vals <- rlang::quo(dplyr::near(rlang::UQ(mapping_x), 
                                          rlang::UQ(values_x), 
-                                         tol = 0.1) &&
+                                         tol = 0.1) &
                                   dplyr::near(rlang::UQ(mapping_y),
                                          rlang::UQ(values_y),
                                          tol = 0.1))
-      dplyr::mutate(.data, is_clicked = rlang::UQ(filter_vals))
-    } else {
-      dplyr::mutate(.data, is_clicked = FALSE)
-    }
+      return(mutate(.data, event = rlang::UQ(filter_vals)))
+    } 
+    mutate(.data, event = FALSE)
   }
-  set_pipeline(.data, list(control_press = fun))
+  .data$.tbl <- set_pipeline(.data$.tbl, list(control_click = fun))
+  .data
 }
 
-push_up <- function(.data, event) {
-  pipeline <- get_pipeline(.data)
-  
+
+right_na <- function(type) {
+  switch(type,
+         character = NA_character_,
+         double = NA_real_,
+         integer = NA_integer_,
+         logical = NA,
+         complex = NA_complex_)
 }
 
-render_shiny <- function(x) {
-
-  require(shiny)
-  ui <- basicPage(
-    plotOutput("plot1")
-  )
-  
-  server <- function(input, output) {
+put_values <- function(.data, vals) {
+  cols <- names(vals)
+  na_vals <- lapply(vals, typeof)
+  for (col in cols) {
     
-    data <- reactive(x)
-    
-    output$plot1 <- renderPlot({
-      render(data())
-    })
-
+    .data <- mutate(.data, UQ(col) := dplyr::case_when(
+      event == TRUE ~ UQ(vals[[col]]),
+      event == FALSE ~ "black"
+    ))
   }
-  shinyApp(ui, server)
+  .data
+}
+
+put <- function(.data, ...) {
+  vals <- rlang::dots_list(...)
+  fun <- put_values
+  fn_fmls(fun)[2] <- list(vals = vals)
+  .data$.tbl <- set_pipeline(.data$.tbl, list(put_values = fun))
+  .data
 }

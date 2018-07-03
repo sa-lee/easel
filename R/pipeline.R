@@ -14,6 +14,16 @@ as_funlist <- function(x) {
   new_funlist(x)
 }
 
+modify_funlist <- function(x, name, new_fun) {
+  x[[name]] <- new_fun
+  x
+}
+
+`[<-.function_list` <- function(x, i, value) {
+  value <- list(rlang::as_function(value))
+  NextMethod()
+}
+
 #' @export
 `[.function_list` <- function(x, i) {
   structure(NextMethod(), class = "function_list")
