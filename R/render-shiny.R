@@ -3,12 +3,25 @@ render_shiny <- function(x) {
   
   pipeline <- attr(x$.tbl, "pipeline")
   has_click_event <- names(pipeline) == "control_click"
-  click_handler <- pipeline[has_click_event][[1]]
-  if (any(has_click_event)) click <- clickOpts(id = "control_click")
+  has_drag_event <- names(pipeline) == "control_drag"
+  
+  if (any(has_click_event)) {
+    click_handler <- pipeline[has_click_event][[1]]
+    click <- clickOpts("click")
+  } else {
+    click <- NULL
+  } 
+  
+  if (any(has_drag_event)) {
+    drag_handler <- pipeline[has_drag_event][[1]]
+    drag <- brushOpts("drag")
+  } else {
+    drag <- NULL
+  }
   
   
   ui <- basicPage(
-    plotOutput("plot1", click = "hello"),
+    plotOutput("plot1", click = click, brush = drag),
     verbatimTextOutput("info")
   )
   
@@ -16,28 +29,33 @@ render_shiny <- function(x) {
   server <- function(input, output) {
     # compute plot data
     output$info <- renderPrint({
-      filter(plot_data(), event == TRUE)
+      handlers()
+      filter(eval_pipeline(x$.tbl), event == TRUE)
     })
     
     
-    data <- reactive({
-      x$.tbl
-    })
-    
-    plot_data <- reactive({
-
-      attr(x$.tbl, "pipeline") <- modify_funlist(attr(x$.tbl, "pipeline"),
-                                                 "control_click",
-                                                 function(.data) {
-                                                   click_handler(.data, input$hello)
-                                                 })
+    handlers <- reactive({
+      if (any(has_click_event)) {
+        attr(x$.tbl, "pipeline") <- modify_funlist(attr(x$.tbl, "pipeline"),
+                                                   "control_click",
+                                                   function(.data) {
+                                                     click_handler(.data, input$click)
+                                                   })  
+      }
       
-      eval_pipeline(x$.tbl)
+      if (any(has_drag_event)) {
+        attr(x$.tbl, "pipeline") <- modify_funlist(attr(x$.tbl, "pipeline"),
+                                                   "control_drag",
+                                                   function(.data) {
+                                                     drag_handler(.data, input$drag)
+                                                   })  
+      }
     })
     # modify click event function
     
     output$plot1 <- renderPlot({
-      ggplot(plot_data(), aes(x = aes_x, y = aes_y)) + geom_point(aes(colour = colour))
+      handlers()
+      render(x$.tbl)
     })
     
   }

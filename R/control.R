@@ -65,5 +65,7 @@ control_drag.mutibble <- function(.data) {
     } 
     mutate(.data, event = FALSE)
   }
+  .data$.tbl <- set_pipeline(.data$.tbl, list(control_drag = fun))
+  .data
 }
 
