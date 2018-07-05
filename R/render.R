@@ -45,7 +45,7 @@ render_layer <- function(x) {
     geom_opts <- list()
   } else {
     geom <- x[["geom"]][1]
-    geom_opts <- x[1, grep("^opts_", names(x))]
+    geom_opts <- dplyr::select(x, dplyr::starts_with("opts_"))
     if (ncol(geom_opts) == 0) {
       geom_opts <- list()
     } else {
