@@ -21,8 +21,8 @@
 # render(p)
 control_click <- function(.data) UseMethod("control_click") 
 
-control_click <- function(.data) {
-  fun = function(.data, .input = NULL) {
+control_click.mutibble <- function(.data) {
+  fun <- function(.data, .input = NULL) {
     if (length(.input) > 0) {
       # this is very shiny dependent 
       mapping_x <- rlang::sym(.input$mapping[["x"]])
@@ -43,33 +43,27 @@ control_click <- function(.data) {
   .data
 }
 
+control_drag <- function(.data) { UseMethod("control_drag") }
 
-right_na <- function(type) {
-  switch(type,
-         character = NA_character_,
-         double = NA_real_,
-         integer = NA_integer_,
-         logical = NA,
-         complex = NA_complex_)
-}
-
-put_values <- function(.data, vals) {
-  cols <- names(vals)
-  na_vals <- lapply(vals, typeof)
-  for (col in cols) {
-    
-    .data <- mutate(.data, UQ(col) := dplyr::case_when(
-      event == TRUE ~ UQ(vals[[col]]),
-      event == FALSE ~ "black"
-    ))
+control_drag.mutibble <- function(.data) {
+  fun <- function(.data, .input = NULL) {
+    if (length(.input) > 0) {
+      # this is very shiny dependent 
+      mapping_x <- rlang::sym(.input$mapping[["x"]])
+      mapping_y <- rlang::sym(.input$mapping[["y"]])
+      values_x_left <- .input$xmin
+      values_x_right <- .input$xmax
+      values_y_left <- .input$ymin
+      values_y_right <- .input$ymax
+      filter_vals <- rlang::quo(dplyr::between(UQ(mapping_x), 
+                                               UQ(values_x_left),
+                                               UQ(values_x_right)) &
+                                  dplyr::between(UQ(mapping_y),
+                                                 UQ(values_y_left),
+                                                 UQ(values_y_right)))
+      return(mutate(.data, event = rlang::UQ(filter_vals)))
+    } 
+    mutate(.data, event = FALSE)
   }
-  .data
 }
 
-put <- function(.data, ...) {
-  vals <- rlang::dots_list(...)
-  fun <- put_values
-  fn_fmls(fun)[2] <- list(vals = vals)
-  .data$.tbl <- set_pipeline(.data$.tbl, list(put_values = fun))
-  .data
-}

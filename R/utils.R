@@ -15,3 +15,12 @@ is_plibble <- function(x) inherits(x, "tbl_pl")
 all_are_plibble <- function(x) {
   all_are_predicate(x, is_plibble)
 }
+
+right_na <- function(type) {
+  switch(type,
+         character = NA_character_,
+         double = NA_real_,
+         integer = NA_integer_,
+         logical = NA,
+         complex = NA_complex_)
+}
