@@ -1,5 +1,10 @@
+# currently using mvc
+# need to break up into more modular code, i.e pipeline stages
+
+
 render_shiny <- function(x) {
   require(shiny)
+  
   
   pipeline <- attr(x$.tbl, "pipeline")
   has_click_event <- names(pipeline) == "control_click"
@@ -26,11 +31,12 @@ render_shiny <- function(x) {
   )
   
   
-  server <- function(input, output) {
+  server <- function(input, output, session) {
     # compute plot data
     output$info <- renderPrint({
       handlers()
-      filter(eval_pipeline(x$.tbl), event == TRUE)
+      print(filter(eval_pipeline(x$.tbl), event == TRUE))
+      print(input$drag)
     })
     
     
@@ -58,6 +64,8 @@ render_shiny <- function(x) {
       render(x$.tbl)
     })
     
+    onStop(function() attr(x$.tbl, "pipeline") <- pipeline)
   }
+
   shinyApp(ui, server)
 }
