@@ -55,3 +55,32 @@ project_pxcoords_points <- function(.data, .emitted) {
   data.frame(aes_x = coord_x*(diff(range(.data[["aes_x"]]))/width), 
              aes_y = (height - coord_y)*(diff(range(.data[["aes_y"]]))/height))
 }
+
+project_pxcoords_rect <- function(.data, .emitted) {
+  if (is.null(.emitted)) return(data.frame(aes_xmin = numeric(0), 
+                                          aes_ymin = numeric(0), 
+                                          aes_xmax = numeric(0), 
+                                          aes_ymax = numeric(0)))
+  start_x <- .emitted$start_x
+  start_y <- .emitted$start_y
+  end_x <- .emitted$end_x
+  end_y <- .emitted$end_y
+  width <- .emitted$width
+  height <- .emitted$height
+  # this doesnt take into account plot margins but will do for now
+  data.frame(aes_xmin = start_x*(diff(range(.data[["aes_x"]]))/width), 
+             aes_ymin = (height - start_y)*(diff(range(.data[["aes_y"]]))/height),
+             aes_xmax = (end_x*(diff(range(.data[["aes_x"]]))/width)),
+             aes_ymax = (height - end_y)*(diff(range(.data[["aes_y"]]))/height))
+}
+
+
+is_clicked <- function(.data, .emitted) {
+  if (nrow(.emitted) > 0) {
+    .clicked <- project_pxcoords_points(.data, .emitted)
+    dplyr::near(.data[["aes_x"]], .clicked[["aes_x"]], tol = 0.1) &
+      dplyr::near(.data[["aes_y"]], .clicked[["aes_y"]], tol = 0.1)
+  } else {
+    rep(FALSE, nrow(.data))
+  }
+}

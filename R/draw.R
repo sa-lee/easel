@@ -67,3 +67,8 @@ draw_rect.tbl_pl <- function(.data, ...) {
   fun <- draw_call(.data, ..., geom = "rect")
   set_pipeline(.data, list(draw_rect = fun))
 }
+
+draw_rect.mutibble <- function(.data, ...) {
+  .data$.tbl <- draw_rect(.data$.tbl, ... )
+  .data
+}
