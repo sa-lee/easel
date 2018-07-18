@@ -2,7 +2,6 @@
 # need to break up into more modular code, i.e pipeline stages
 
 render_shiny <- function(x) {
-  require(shiny)
   pipeline <- attr(x$.tbl, "pipeline")
   n_stages <- length(pipeline)
   layers <- grep("draw", names(pipeline))
@@ -21,31 +20,25 @@ render_shiny <- function(x) {
     drag <- NULL
   }
   
-  ui <- basicPage(
-    click,
-    drag,
-    plotOutput(plot_div),
-    tableOutput("info")
-  )
+  require(htmltools)
+  static_plot <- render(x$.tbl)
+  dir <- tempdir()
+  tmp <- "temp.png"
+  img <- ggplot2::ggsave(tmp, 
+                         static_plot,
+                         path = dir,
+                         width = 6, 
+                         height = 4, 
+                         units = "cm", 
+                         dpi = 320)
   
-  
-  server <- function(input, output, session) {
-    # compute plot data
-    print(layers)
-    print(controls)
-    static_layer_pipeline <- pipeline[1:layers[layers < controls]]
-    attr(x$.tbl, "pipeline") <- static_layer_pipeline
-    static_data <- eval_pipeline(x$.tbl)
-    
-    interactive_layer <- pipeline[controls]
-    print(interactive_layer)
-    output$info <- renderTable(interactive_layer$control_drag(static_data, input$drag))
-    
-    output[[plot_div]] <- renderPlot({
-      render(x$.tbl) 
-    })
-    onStop(function() attr(x$.tbl, "pipeline") <- pipeline)
-  }
-  shinyApp(ui, server)
-  
+  doc <- 
+    tags$div(
+      tags$canvas(id = plot_div),
+      tags$script(
+        add_img_canvas(plot_div, tmp)
+      )
+    )
+  save_html(doc, file = paste0(dir, "/index.html"))
+  servr::httd(dir = dir)
 }
