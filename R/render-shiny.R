@@ -1,6 +1,32 @@
 # currently using mvc
 # need to break up into more modular code, i.e pipeline stages
 
+vl_types <- function(x) {
+  switch(class(x)[1],
+         "numeric" = "quantitative",
+         "integer" = "ordinal",
+         "factor" = "nominal",
+         "ordered" = "ordinal",
+         "character" = "nominal",
+         )
+}
+
+# a very minimal vegalite spec
+to_vl_spec <- function(.data) {
+  plot_data <- dplyr::select(.data, dplyr::starts_with("aes"))
+  mark <- .data[["geom"]][1]
+  encodings <- vector("list", ncol(plot_data))
+  names(encodings) <- sub("aes_", "", names(plot_data))
+  for (i in seq_along(encodings)) {
+    encodings[[i]] <- list(field = names(plot_data)[[i]], 
+                           type = vl_types(plot_data[[i]]))
+  }
+  list(data = list(values = plot_data),
+       mark = mark,
+       encoding = encodings)
+} 
+
+
 render_shiny <- function(x) {
   pipeline <- attr(x$.tbl, "pipeline")
   n_stages <- length(pipeline)
@@ -23,7 +49,7 @@ render_shiny <- function(x) {
   require(htmltools)
   static_plot <- render(x$.tbl)
   dir <- tempdir()
-  tmp <- "temp.png"
+  tmp <- tempfile(fileext = ".png")
   img <- ggplot2::ggsave(tmp, 
                          static_plot,
                          path = dir,
@@ -40,5 +66,6 @@ render_shiny <- function(x) {
       )
     )
   save_html(doc, file = paste0(dir, "/index.html"))
+  
   servr::httd(dir = dir)
 }
