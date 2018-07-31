@@ -35,25 +35,41 @@ to_vg_spec <- function(.data) {
   }
   names(encodings) <- c("x", "y")
   
+  signals <- vg_signals()
+  
+  
   axes <- list(
     list(orient = "bottom", grid = TRUE, scale = "aes_x"),
     list(orient = "left", grid = TRUE, scale = "aes_y")
   )
   marks <- list(
-    name = "layer",
-    type = "symbol",
-    from = list(data = "source"),
-    encode = list(update = encodings)
-  )
+    list(name = "layer",
+         type = "symbol",
+         from = list(data = "source"),
+         encode = list(update = encodings)
+    ),
+    list(name = "brush",
+         type = "rect",
+         encode = list(enter = 
+                         list(fill = list(value = "transparent")),
+                       update = 
+                         list("x" = list(signal = "brushX[0]"),
+                              "x2" = list(signal = "brushX[1]"),
+                              "y" = list(signal = "brushY[0]"),
+                              "y2" = list(signal = "brushY[1]"),
+                              "stroke" = list(value = "black"),
+                              "strokeWidth" = list(value = 1))))
+    )
   
   list(`$schema` =  "https://vega.github.io/schema/vega/v4.json",
        width = 200,
        height = 200,
        padding = 5,
        data = list(list(name = "source", values = plot_data)),
+       signals = signals,
        scales = scales,
        axes = axes,
-       marks = list(marks)
+       marks = marks
        )
 } 
 
