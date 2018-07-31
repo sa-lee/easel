@@ -46,7 +46,11 @@ to_vg_spec <- function(.data) {
     encode = list(update = encodings)
   )
   
-  list(data = list(list(name = "source", values = plot_data)),
+  list(`$schema` =  "https://vega.github.io/schema/vega/v4.json",
+       width = 200,
+       height = 200,
+       padding = 5,
+       data = list(list(name = "source", values = plot_data)),
        scales = scales,
        axes = axes,
        marks = list(marks)
