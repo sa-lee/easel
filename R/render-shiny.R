@@ -11,19 +11,46 @@ vl_types <- function(x) {
          )
 }
 
-# a very minimal vegalite spec
-to_vl_spec <- function(.data) {
+vg_range <- function(nm) {
+  if (grepl("x", nm)) return("width")
+  return("height")
+}
+
+# a very minimal vega spec
+to_vg_spec <- function(.data) {
   plot_data <- dplyr::select(.data, dplyr::starts_with("aes"))
   mark <- .data[["geom"]][1]
-  encodings <- vector("list", ncol(plot_data))
-  names(encodings) <- sub("aes_", "", names(plot_data))
-  for (i in seq_along(encodings)) {
-    encodings[[i]] <- list(field = names(plot_data)[[i]], 
-                           type = vl_types(plot_data[[i]]))
+  aes_nms <- names(plot_data)
+  scales <- vector("list", ncol(plot_data))
+  encodings <- scales
+  for (i in seq_along(scales)) {
+    scales[[i]] <- list(name = aes_nms[[i]],
+                        type = "linear",
+                        round = TRUE,
+                        nice = TRUE,
+                        domain = list(data = "source", field = aes_nms[[i]]),
+                        range = vg_range(aes_nms[[i]]))
+    encodings[[i]] <- list(scale = aes_nms[[i]],
+                           field = aes_nms[[i]])
   }
-  list(data = list(values = plot_data),
-       mark = mark,
-       encoding = encodings)
+  names(encodings) <- c("x", "y")
+  
+  axes <- list(
+    list(orient = "bottom", grid = TRUE, scale = "aes_x"),
+    list(orient = "left", grid = TRUE, scale = "aes_y")
+  )
+  marks <- list(
+    name = "layer",
+    type = "symbol",
+    from = list(data = "source"),
+    encode = list(update = encodings)
+  )
+  
+  list(data = list(list(name = "source", values = plot_data)),
+       scales = scales,
+       axes = axes,
+       marks = list(marks)
+       )
 } 
 
 
@@ -33,39 +60,4 @@ render_shiny <- function(x) {
   layers <- grep("draw", names(pipeline))
   controls <- grep("control", names(pipeline))
   
-  plot_div <- "pl"
-  if (any(names(pipeline) == "control_click")) {
-    click <- tags$script(click_handler_js(plot_div))
-  } else {
-    click <- NULL
-  } 
-  
-  if (any(names(pipeline) == "control_drag")) {
-    drag <- tags$script(drag_handler_js(plot_div))
-  } else {
-    drag <- NULL
-  }
-  
-  require(htmltools)
-  static_plot <- render(x$.tbl)
-  dir <- tempdir()
-  tmp <- tempfile(fileext = ".png")
-  img <- ggplot2::ggsave(tmp, 
-                         static_plot,
-                         path = dir,
-                         width = 6, 
-                         height = 4, 
-                         units = "cm", 
-                         dpi = 320)
-  
-  doc <- 
-    tags$div(
-      tags$canvas(id = plot_div),
-      tags$script(
-        add_img_canvas(plot_div, tmp)
-      )
-    )
-  save_html(doc, file = paste0(dir, "/index.html"))
-  
-  servr::httd(dir = dir)
 }
