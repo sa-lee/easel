@@ -2,29 +2,24 @@
 # ideally these should be handled without JS or shiny but for now they are
 # ok these are placed in the script tag of 
 
-click_handler_js <- function(plot_div) {
+click_handler_js <- function() {
   js_fun <- "$(function(){ 
-    $(plot_div).click(function(e) {
-      var output = {};
-      output.coord_x = e.clientX;
-      output.coord_y = e.clientY;
-      output.width = $(plot_div).width();
-      output.height = $(plot_div).height();
-      Shiny.onInputChange('click', output)
+    $('pl').click(function(e) {
+      console.log(e);
     });
   }) 
  "
-  stringr::str_replace_all(js_fun, "plot_div", plot_div)
+  js_fun
 }
 
-drag_handler_js <- function(plot_div) {
+drag_handler_js <- function() {
   js_fun <- "$(function(){
     var is_drawing = false;
     var output = {};
-    output.width = $(plot_div).width();
-    output.height = $(plot_div).height();
-    $(plot_div).on('dragstart', function(e) { e.preventDefault()});
-    $(plot_div).mousedown(function(e) {
+    output.width = $('path.background').width();
+    output.height = $('path.background').height();
+    $('path.background').on('dragstart', function(e) { e.preventDefault()});
+    $('path.background').mousedown(function(e) {
       is_drawing = true;
       output.start_x = e.clientX;
       output.start_y = e.clientY;
@@ -41,7 +36,7 @@ drag_handler_js <- function(plot_div) {
       Shiny.onInputChange('drag', output);
     });
   })"
-  stringr::str_replace_all(js_fun, "plot_div", plot_div)
+  js_fun
 }
 
 

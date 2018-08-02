@@ -29,6 +29,14 @@ control_click.mutibble <- function(.data, handler) {
 
 control_drag <- function(.data, handler) { UseMethod("control_drag") }
 
+control_drag.tbl_pl <- function(.data, handler) {
+  fun <- function(.data) {
+    attr(.data, "signal") <- vg_drag()
+    .data
+  }
+  set_pipeline(.data, list(control_drag = fun))
+}
+
 control_drag.mutibble <- function(.data, handler) {
   .data$.tbl <- set_pipeline(.data$.tbl, list(control_drag = handler))
   .data
