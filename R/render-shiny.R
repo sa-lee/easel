@@ -1,10 +1,8 @@
 render_shiny <- function(x) {
-  
   load_shiny <- require("shiny", quietly = TRUE) || 
     stop("Please install shiny...")
   
   plot_div <- "pl"
-  
   pipeline <- attr(x$.tbl, "pipeline")
   n_stages <- length(pipeline)
   layers <- grep("draw", names(pipeline))
