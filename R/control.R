@@ -32,6 +32,12 @@ control_drag <- function(.data, handler) { UseMethod("control_drag") }
 control_drag.tbl_pl <- function(.data, handler) {
   fun <- function(.data) {
     attr(.data, "signal") <- vg_drag()
+    rect_df <- shiny::reactive(
+      tibble::tibble(aes_xmin = NA_real_,
+                     aes_xmax = NA_real_,
+                     aes_ymin = NA_real_,
+                     aes_ymax = NA_real_)
+    )
     .data
   }
   set_pipeline(.data, list(control_drag = fun))
