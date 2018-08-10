@@ -9,6 +9,10 @@ vg_range <- function(nm) {
   return("height")
 }
 
+aes_to_vg_encode <- function(mappings, geom) {
+  
+}
+
 vg_scaffold <- function(width, height) {
   list(`$schema` = "https://vega.github.io/schema/vega/v4.json",
        width = width, 
@@ -25,11 +29,34 @@ vg_scaffold <- function(width, height) {
 to_vg_spec <- function(.tbl) {
   scaffold <- vg_scaffold(height = 200, width = 200)
   
-  scaffold$signals <- attr(.tbl, "signal")
+  signals_loc <- unlist(
+    lapply(.tbl, 
+           function(.x) any(lapply(.x, is_list_col_reactive))
+    )
+  )
+  
+  signals_data <- .tbl[signals_loc]
+  
+  scaffold$signals[[1]] <- lapply(signals_data,
+                                  function(.) get_pipeline(.)$signal()
+    
+  )
+  
+  # any marks triggered by signals
+  for (i in seq_along(signals_data)) {
+    if ("geom" %in% names(signals_data[[i]])) {
+      list(
+        type = signals_data[[i]]$geom[1],
+        encode = list(update = )
+      )
+    }
+  }
+
+  
   
   scaffold$data[[1]] <- list(
     name = "source",
-    values = dplyr::select(.tbl, dplyr::starts_with("aes"))
+    values = dplyr::select(.tbl$layer, dplyr::starts_with("aes"))
   )
   
   aes_nms <- names(scaffold$data[[1]]$values)

@@ -24,3 +24,9 @@ right_na <- function(type) {
          logical = NA,
          complex = NA_complex_)
 }
+
+is_list_col_reactive <- function(x) {
+  if (is.list(x)) 
+    return(is.reactive(.y[[1]]))
+  FALSE
+}

@@ -21,8 +21,8 @@ vg_drag_y <- function() {
        ))
 }
 
-vg_drag <- function(id) {
-  list(name = id,
+vg_drag <- function() {
+  list(name = "drag",
        value = 0,
        on = list(
          list(

@@ -37,7 +37,6 @@ control_drag.tbl_pl <- function(.data, handler) {
       rlang::quos(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
       list(signal = vg_drag)
     )
-    
     c(.data, list(tbl))
   }
   
