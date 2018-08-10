@@ -8,19 +8,33 @@
 #'  2. overwrite it?
 set_opts <- function(.data, opts, geom) {
   
+  n <- length(.data)
+  
+  if ("geom" %in% names(.data[[n]])) {
+    # inherit aesthetics 
+    .data <- c(
+      .data, 
+      list(
+        dplyr::select(.data[[n]], dplyr::starts_with("aes"))
+      )
+    )
+    n <- n + 1
+  }
+  
   if (rlang::is_empty(opts)) {
-    mutate(.data, geom = rlang::UQ(geom))
+    mutate_at_layer(.data, n, geom = rlang::UQ(geom))
   } else {
     # override aes if  opts coincide with it
-    current_aes <- get_mapping(.data)
+    current_aes <- get_mapping(.data[[n]])
     is_overlap <- names(opts) %in% names(current_aes)
     if (any(is_overlap)) {
       message("updating aesthetics...")
       names(opts[is_overlap]) <- paste0("aes_", names(opts[is_overlap]))
     }
     names(opts)[!is_overlap] <- paste0("opts_", names(opts)[!is_overlap])
-    mutate(.data, geom = rlang::UQ(geom), rlang::UQS(opts))
+    mutate_at_layer(.data, n,  geom = rlang::UQ(geom), rlang::UQS(opts))
   }
+  
 }
 
 draw_call <- function(.data, ..., geom) {
@@ -72,3 +86,5 @@ draw_rect.mutibble <- function(.data, ...) {
   .data$.tbl <- draw_rect(.data$.tbl, ... )
   .data
 }
+
+
