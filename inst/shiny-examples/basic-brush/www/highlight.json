@@ -1,0 +1,249 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v4.json",
+  "width": 200,
+  "height": 200,
+  "padding": 15,
+  "signals": [
+    {
+      "name": "drag",
+      "value": 0,
+      "on": [
+        {
+          "events": "mousedown",
+          "update": "{xmin: x(), xmax: x(), ymin: y(), ymax: y()}"
+        },
+        {
+          "events": "[mousedown, window:mouseup] > window:mousemove",
+          "update": "{xmin: drag.xmin, xmax: clamp(x(), 0, width), ymin: drag.ymin, ymax: clamp(y(), 0, width)}"
+        }
+      ]
+    }
+  ],
+  "data": [
+    {
+      "name": "source",
+      "values": [
+        {
+          "aes_x": 110,
+          "aes_y": 21
+        },
+        {
+          "aes_x": 110,
+          "aes_y": 21
+        },
+        {
+          "aes_x": 93,
+          "aes_y": 22.8
+        },
+        {
+          "aes_x": 110,
+          "aes_y": 21.4
+        },
+        {
+          "aes_x": 175,
+          "aes_y": 18.7
+        },
+        {
+          "aes_x": 105,
+          "aes_y": 18.1
+        },
+        {
+          "aes_x": 245,
+          "aes_y": 14.3
+        },
+        {
+          "aes_x": 62,
+          "aes_y": 24.4
+        },
+        {
+          "aes_x": 95,
+          "aes_y": 22.8
+        },
+        {
+          "aes_x": 123,
+          "aes_y": 19.2
+        },
+        {
+          "aes_x": 123,
+          "aes_y": 17.8
+        },
+        {
+          "aes_x": 180,
+          "aes_y": 16.4
+        },
+        {
+          "aes_x": 180,
+          "aes_y": 17.3
+        },
+        {
+          "aes_x": 180,
+          "aes_y": 15.2
+        },
+        {
+          "aes_x": 205,
+          "aes_y": 10.4
+        },
+        {
+          "aes_x": 215,
+          "aes_y": 10.4
+        },
+        {
+          "aes_x": 230,
+          "aes_y": 14.7
+        },
+        {
+          "aes_x": 66,
+          "aes_y": 32.4
+        },
+        {
+          "aes_x": 52,
+          "aes_y": 30.4
+        },
+        {
+          "aes_x": 65,
+          "aes_y": 33.9
+        },
+        {
+          "aes_x": 97,
+          "aes_y": 21.5
+        },
+        {
+          "aes_x": 150,
+          "aes_y": 15.5
+        },
+        {
+          "aes_x": 150,
+          "aes_y": 15.2
+        },
+        {
+          "aes_x": 245,
+          "aes_y": 13.3
+        },
+        {
+          "aes_x": 175,
+          "aes_y": 19.2
+        },
+        {
+          "aes_x": 66,
+          "aes_y": 27.3
+        },
+        {
+          "aes_x": 91,
+          "aes_y": 26
+        },
+        {
+          "aes_x": 113,
+          "aes_y": 30.4
+        },
+        {
+          "aes_x": 264,
+          "aes_y": 15.8
+        },
+        {
+          "aes_x": 175,
+          "aes_y": 19.7
+        },
+        {
+          "aes_x": 335,
+          "aes_y": 15
+        },
+        {
+          "aes_x": 109,
+          "aes_y": 21.4
+        }
+      ]
+    }
+  ],
+  "scales": [
+    {
+      "name": "aes_x",
+      "type": "linear",
+      "round": true,
+      "nice": true,
+      "domain": {
+        "data": "source",
+        "field": "aes_x"
+      },
+      "range": "width"
+    },
+    {
+      "name": "aes_y",
+      "type": "linear",
+      "round": true,
+      "nice": true,
+      "domain": {
+        "data": "source",
+        "field": "aes_y"
+      },
+      "range": "height"
+    }
+  ],
+  "axes": [
+    {
+      "orient": "bottom",
+      "grid": true,
+      "scale": "aes_x"
+    },
+    {
+      "orient": "left",
+      "grid": true,
+      "scale": "aes_y"
+    }
+  ],
+  "marks": [
+    {
+      "name": "brush",
+      "type": "rect",
+      "encode": {
+        "update": {
+          "x": {
+            "signal": "drag.xmin"
+          },
+          "x2": {
+            "signal": "drag.xmax"
+          },
+          "y": {
+            "signal": "drag.ymin"
+          },
+          "y2": {
+            "signal": "drag.ymax"
+          },
+          "fill": {
+            "value": "#eee"
+          }
+        }
+      }
+    },
+    {
+      "name": "layer",
+      "type": "symbol",
+      "interactive": false,
+      "from": {
+        "data": "source"
+      },
+      "encode": {
+        "enter": {
+          "x": {
+            "scale": "aes_x",
+            "field": "aes_x"
+          },
+          "y": {
+            "scale": "aes_y",
+            "field": "aes_y"
+          }
+        },
+        "update": {
+          "fill": [
+            {
+              "test": "inrange(datum.aes_x, invert('aes_x', [drag.xmin, drag.xmax])) && inrange(datum.aes_y, invert('aes_y', [drag.ymin, drag.ymax]))",
+              "value": "red"
+            },
+            {
+              "value": "steelblue"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
