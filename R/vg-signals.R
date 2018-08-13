@@ -1,4 +1,5 @@
-
+#' place holders for some vega signals
+#' 
 vg_drag_x <- function() {
   list(name = "brushX", 
        value = "0",
