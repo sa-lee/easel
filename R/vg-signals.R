@@ -32,7 +32,7 @@ vg_drag <- function() {
            ),
          list(
            events = "[mousedown, window:mouseup] > window:mousemove",
-           update= "{xmin: x(), xmax: clamp(x(), 0, width), ymin: x(), ymax:clamp(y(), 0, height)}"
+           update= "{xmin: drag.xmin, xmax: clamp(x(), 0, width), ymin: drag.ymin, ymax:clamp(y(), 0, height)}"
          )
        )
   )

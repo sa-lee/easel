@@ -34,7 +34,7 @@ control_drag.tbl_pl <- function(.data, handler) {
     rect_model <- tibble::tibble(control = list(shiny::reactive({input$drag })))
     tbl <- build_plibble(
       rect_model,
-      rlang::quos(x = xmin, x1 = xmax, y = ymin, y2 = ymax),
+      rlang::quos(x = xmin, x2 = xmax, y = ymin, y2 = ymax),
       list(signal = vg_drag)
     )
     c(.data, list(tbl))

@@ -31,41 +31,40 @@ to_vg_spec <- function(.tbl) {
   
   signals_loc <- unlist(
     lapply(.tbl, 
-           function(.x) any(lapply(.x, is_list_col_reactive))
+           function(.x) any(vapply(.x, is_list_col_reactive, logical(1)))
     )
   )
-  
+
   signals_data <- .tbl[signals_loc]
   
-  scaffold$signals[[1]] <- lapply(signals_data,
-                                  function(.) get_pipeline(.)$signal()
+  scaffold$signals <- lapply(seq_along(signals_data),
+            function(i) get_pipeline(signals_data[[i]])$signal()
     
   )
+  names(scaffold$signals) <- NULL
   
   
   signal_update_marks <- vapply(seq_along(signals_data), 
                            function(i) "geom" %in% names(signals_data[[i]]),
                            logical(1))
-  
   signal_marks <- vector("list", length = sum(signal_update_marks))
   
   signal_marks_data <- signals_data[signal_update_marks]
   # any marks triggered by signals
   for (i in seq_along(signal_marks_data)) {
     
-    mapping <- get_mapping(signals_marks_data[[i]])
+    mapping <- get_mapping(signal_marks_data[[i]])
     signal_encoding <- lapply(mapping, 
                               function(.) 
                                 list(signal = paste0("drag.", rlang::quo_name(.)))
     )
     
-    signal_marks_data[[i]] <- list(
-      type = signals_marks_data[[i]]$geom[1],
+    signal_marks[[i]] <- list(
+      type = signal_marks_data[[i]]$geom[1],
       encode = list(update = signal_encoding)
     )
   }
 
-  
   
   scaffold$data[[1]] <- list(
     name = "source",
@@ -73,6 +72,7 @@ to_vg_spec <- function(.tbl) {
   )
   
   aes_nms <- names(scaffold$data[[1]]$values)
+  geoms <- .tbl$layer$geom[1]
   scaffold$scales <- vector("list", length(aes_nms))
   encodings <- vector("list", length(aes_nms))
   names(encodings) <- gsub("aes_", "", aes_nms)
@@ -86,8 +86,9 @@ to_vg_spec <- function(.tbl) {
                         nice = TRUE,
                         domain = list(data = "source", field = aes_nms[[i]]),
                         range = vg_range(aes_nms[[i]]))
-    encodings[[i]] <- list(scale = aes_nms[[i]],
-                                          field = aes_nms[[i]])
+    encodings[[i]] <- list(scale = aes_nms[[i]], 
+                           field = aes_nms[[i]])
+
   }
 
   scaffold$axes[[1]] <- list(orient = "bottom", 
@@ -98,11 +99,12 @@ to_vg_spec <- function(.tbl) {
                              scale = "aes_y")
   
   scaffold$marks[[1]] <- list(
-    name = "layer",
     type = "symbol",
-    from = list(data = "source"),
+    from = list(data = scaffold$data[[1]]$name),
     encode = list(update = encodings)
   )
+  
+  scaffold$marks <- c(signal_marks, scaffold$marks)
   
   return(scaffold)
 } 
