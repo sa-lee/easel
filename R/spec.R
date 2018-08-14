@@ -59,6 +59,21 @@ to_vg_spec <- function(.tbl) {
                                 list(signal = paste0("drag.", rlang::quo_name(.)))
     )
     
+    # any other opts?
+    opts_data <- dplyr::select(signal_marks_data[[i]], 
+                               dplyr::starts_with("opts"))
+    if (ncol(opts_data) > 0) {
+      names(opts_data) <- gsub("opts_", "", names(opts_data))
+      opts_list <- lapply(names(opts_data),
+                          function(col) {
+                           list(value = opts_data[[col]])
+                          })
+      names(opts_list) <- names(opts_data)
+      signal_encoding <- c(signal_encoding, opts_list)
+    }
+    
+    
+    
     signal_marks[[i]] <- list(
       type = signal_marks_data[[i]]$geom[1],
       encode = list(update = signal_encoding)
