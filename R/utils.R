@@ -30,3 +30,16 @@ is_list_col_reactive <- function(x) {
     return(shiny::is.reactive(x[[1]]))
   FALSE
 }
+
+
+inside <- function(x, y, control) {
+  if (is_list_col_reactive(control)) {
+    vals <- try(control[[1]](), silent = TRUE)
+    if (inherits(vals, "try-error")) {
+      return(FALSE)
+    }
+    dplyr::between(x, vals$xmin, vals$xmax) &&
+      dplyr::between(y, vals$ymin, vals$ymax)
+  }
+  
+}
