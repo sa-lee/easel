@@ -42,14 +42,27 @@ to_vg_spec <- function(.tbl) {
     
   )
   
+  
+  signal_update_marks <- vapply(seq_along(signals_data), 
+                           function(i) "geom" %in% names(signals_data[[i]]),
+                           logical(1))
+  
+  signal_marks <- vector("list", length = sum(signal_update_marks))
+  
+  signal_marks_data <- signals_data[signal_update_marks]
   # any marks triggered by signals
-  for (i in seq_along(signals_data)) {
-    if ("geom" %in% names(signals_data[[i]])) {
-      list(
-        type = signals_data[[i]]$geom[1],
-        encode = list(update = )
-      )
-    }
+  for (i in seq_along(signal_marks_data)) {
+    
+    mapping <- get_mapping(signals_marks_data[[i]])
+    signal_encoding <- lapply(mapping, 
+                              function(.) 
+                                list(signal = paste0("drag.", rlang::quo_name(.)))
+    )
+    
+    signal_marks_data[[i]] <- list(
+      type = signals_marks_data[[i]]$geom[1],
+      encode = list(update = signal_encoding)
+    )
   }
 
   
