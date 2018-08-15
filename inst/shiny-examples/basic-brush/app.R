@@ -1,7 +1,7 @@
 # Testing we can use vega signal listeners to return data back to
 # R
 library(shiny)
-devtools::load_all("~/easel/")
+library(shiny)
 
 ui <- fluidPage(
   tags$head(
@@ -13,17 +13,9 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session) {
-  p <- mtcars %>% 
-    visualise(x = hp, y = mpg) %>% 
-    draw_points() %>% 
-    control_drag() %>% 
-    draw_rect()
-  message <- p %>% eval_pipeline() %>% to_vg_spec()
-  session$sendCustomMessage("spec", 
-                            jsonlite::toJSON(message, 
-                                             pretty = TRUE, 
-                                             auto_unbox = TRUE))
-  
+  observeEvent(input$xcoords, {
+    cat("Brushing xcoords: ", input$xcoords, sep = "\n") 
+  })
 }
 
 shinyApp(ui, server)
