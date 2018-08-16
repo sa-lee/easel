@@ -1,7 +1,6 @@
 # Testing we can use vega signal listeners to return data back to
 # R
 library(shiny)
-library(shiny)
 
 ui <- fluidPage(
   tags$head(
