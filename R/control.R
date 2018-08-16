@@ -27,18 +27,22 @@ control_click.mutibble <- function(.data, handler) {
 }
 
 
-control_drag <- function(.data, handler) { UseMethod("control_drag") }
+control_drag <- function(.data, id) { UseMethod("control_drag") }
 
-control_drag.tbl_pl <- function(.data, handler) {
-  fun <- function(.data) {
-    rect_model <- tibble::tibble(control = list(shiny::reactive({input$drag })))
+control_drag.tbl_pl <- function(.data, id) {
+  fun <- function(.data, id) {
+    rect_model <- tibble::tibble(event = list(shiny::reactiveValues()))
     tbl <- build_plibble(
       rect_model,
       rlang::quos(x = xmin, x2 = xmax, y = ymin, y2 = ymax),
       list(signal = vg_drag)
     )
-    c(.data, list(tbl))
+    tbl <- list(tbl)
+    names(tbl) <- id
+    c(.data, tbl)
   }
+  rlang::fn_fmls(fun)[2] <- list(id = id)
+  
   
   set_pipeline(.data, list(control_drag = fun))
 }
