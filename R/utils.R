@@ -27,6 +27,6 @@ right_na <- function(type) {
 
 is_list_col_reactive <- function(x) {
   if (is.list(x)) 
-    return(shiny::is.reactive(x[[1]]))
+    return(shiny::is.reactivevalues(x[[1]]))
   FALSE
 }

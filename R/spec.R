@@ -37,6 +37,7 @@ to_vg_spec <- function(.tbl) {
 
   signals_data <- .tbl[signals_loc]
   
+  print(signals_data)
   scaffold$signals <- lapply(seq_along(signals_data),
             function(i) get_pipeline(signals_data[[i]])$signal()
     
