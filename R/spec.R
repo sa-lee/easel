@@ -86,22 +86,26 @@ to_vg_spec <- function(.tbl) {
   
   aes_nms <- names(scaffold$data[[1]]$values)
   geoms <- .tbl$layer$geom[1]
-  scaffold$scales <- vector("list", length(aes_nms))
+  scaffold$scales <- vector("list", length(setdiff(aes_nms,c("aes_x", "aes_x"))))
   encodings <- vector("list", length(aes_nms))
   names(encodings) <- gsub("aes_", "", aes_nms)
   
   
   # only works for continuous scales at the moment
   for (i in seq_along(aes_nms)) {
-    scaffold$scales[[i]] <- list(name = aes_nms[[i]],
-                        type = "linear",
-                        round = TRUE,
-                        nice = TRUE,
-                        domain = list(data = "source", field = aes_nms[[i]]),
-                        range = vg_range(aes_nms[[i]]))
-    encodings[[i]] <- list(scale = aes_nms[[i]], 
-                           field = aes_nms[[i]])
-
+    current_aes <- aes_nms[[i]]
+    if (current_aes %in% c("aes_x", "aes_y")) {
+      scaffold$scales[[i]] <- list(name = current_aes,
+                                   type = "linear",
+                                   round = TRUE,
+                                   nice = TRUE,
+                                   domain = list(data = "source", field = current_aes),
+                                   range = vg_range(current_aes))
+      encodings[[i]] <- list(scale = current_aes, 
+                             field = current_aes)
+    } else {
+      encodings[[i]] <- list(field = current_aes)
+    }
   }
 
   scaffold$axes[[1]] <- list(orient = "bottom", 
@@ -114,7 +118,7 @@ to_vg_spec <- function(.tbl) {
   scaffold$marks[[1]] <- list(
     type = "symbol",
     from = list(data = scaffold$data[[1]]$name),
-    encode = list(update = encodings)
+    encode = list(enter = encodings)
   )
   
   scaffold$marks <- c(signal_marks, scaffold$marks)

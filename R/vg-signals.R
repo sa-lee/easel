@@ -51,7 +51,7 @@ vg_drag <- function() {
          on = list(
            list(
              events = list(signal = "drag"),
-             update = "invert('aes_x', [drag.ymin, drag.ymax])"
+             update = "invert('aes_y', [drag.ymin, drag.ymax])"
            )
          )
     )
