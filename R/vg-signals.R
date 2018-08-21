@@ -23,17 +23,37 @@ vg_drag_y <- function() {
 }
 
 vg_drag <- function() {
-  list(name = "drag",
-       value = 0,
-       on = list(
-         list(
-           events = "mousedown",
-           update = "{xmin: x(), xmax: x(), ymin: y(), ymax: y()}"
+  list(
+    list(name = "drag",
+         value = 0,
+         on = list(
+           list(
+             events = "mousedown",
+             update = "{xmin: x(), xmax: x(), ymin: y(), ymax: y()}"
            ),
-         list(
-           events = "[mousedown, window:mouseup] > window:mousemove",
-           update= "{xmin: drag.xmin, xmax: clamp(x(), 0, width), ymin: drag.ymin, ymax:clamp(y(), 0, height)}"
+           list(
+             events = "[mousedown, window:mouseup] > window:mousemove",
+             update= "{xmin: drag.xmin, xmax: clamp(x(), 0, width), ymin: drag.ymin, ymax:clamp(y(), 0, height)}"
+           )
          )
-       )
+    ),
+    list(name = "drag_range_x",
+         value = c(0,0),
+         on = list(
+           list(
+             events = list(signal = "drag"),
+             update = "invert('aes_x', [drag.xmin, drag.xmax])"
+           )
+         )
+    ),
+    list(name = "drag_range_y",
+         value = c(0,0),
+         on = list(
+           list(
+             events = list(signal = "drag"),
+             update = "invert('aes_x', [drag.ymin, drag.ymax])"
+           )
+         )
+    )
   )
 }

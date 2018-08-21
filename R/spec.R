@@ -15,8 +15,8 @@ aes_to_vg_encode <- function(mappings, geom) {
 
 vg_scaffold <- function(width, height) {
   list(`$schema` = "https://vega.github.io/schema/vega/v4.json",
-       width = width, 
-       height = height,
+       width = NULL, 
+       height = NULL,
        signals = list(),
        data = list(),
        scales = list(),
@@ -27,21 +27,18 @@ vg_scaffold <- function(width, height) {
 
 # a very minimal vega spec, for a single layer only!
 to_vg_spec <- function(.tbl) {
-  scaffold <- vg_scaffold(height = 200, width = 200)
+  scaffold <- vg_scaffold()
   
-  signals_loc <- unlist(
-    lapply(.tbl, 
-           function(.x) any(vapply(.x, is_list_col_reactive, logical(1)))
-    )
-  )
+  signals_loc <- which_signals(.tbl)
 
   signals_data <- .tbl[signals_loc]
   
-  print(signals_data)
   scaffold$signals <- lapply(seq_along(signals_data),
             function(i) get_pipeline(signals_data[[i]])$signal()
     
   )
+
+  scaffold$signals <- unlist(scaffold$signals, recursive = FALSE)
   names(scaffold$signals) <- NULL
   
   

@@ -1,36 +1,41 @@
 render_shiny <- function(x) {
-  load_shiny <- require("shiny", quietly = TRUE) || 
-    stop("Please install shiny...")
+
+  pl <- eval_pipeline(x)
   
-  plot_div <- "pl"
-  pipeline <- attr(x$.tbl, "pipeline")
-  n_stages <- length(pipeline)
-  layers <- grep("draw", names(pipeline))
+  signals_loc <- which_signals(pl)
   
-  controls <- grep("control", names(pipeline))
+  signals_reactives <- pl[signals_loc]
+  cols_reactive <- signals_reactives[[1]]
   
-  if (any(names(pipeline) == "control_click")) {
-    click <- tags$script(click_handler_js(plot_div))
-  } else {
-    click <- NULL
-  } 
-  
-  if (any(names(pipeline) == "control_drag")) {
-    drag <- tags$script(drag_handler_js(plot_div))
-  } else {
-    drag <- NULL
-  }
-    
-  ui <- shiny::basicPage(
-    vegaliteSpecOutput('pl'),
-    tags$script(click_handler_js())
+  ui <- shiny::fluidPage(
+    vegawidget::vegawidgetOutput("vis"),
+    shiny::verbatimTextOutput("cl")
   )
   
-  server <- function(input, output) {
+  server <- function(input, output, session) {
+    spec <- reactive({ to_vg_spec(pl) })
     
-    spec <- to_vl_spec(eval_pipeline(x$.tbl))
-    output$pl <- renderVegaliteSpec(vl)
-    observe({if(!is.null(input$click)) print(input$click)})
+    output$vis <- vegawidget::renderVegawidget({
+      vegawidget::vw_add_signal_listener(
+        vegawidget::vw_add_signal_listener(
+          vegawidget::vegawidget(vegawidget::as_vegaspec(spec()), 
+                                 height = 400, 
+                                 width = 400),
+          "drag_range_x"
+        ),
+        "drag_range_y"
+      )
+    })
+    
+
+    cols_reactive$event[[1]] <-  observe({
+      c(input$vis_drag_range_x, input$vis_drag_range_y)
+    })
+    
+    
+    output$cl <- shiny::renderPrint({
+      cols_reactive$event[[1]]()
+    })
     
   }
   shiny::shinyApp(ui, server)

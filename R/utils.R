@@ -30,3 +30,11 @@ is_list_col_reactive <- function(x) {
     return(shiny::is.reactivevalues(x[[1]]))
   FALSE
 }
+
+which_signals <- function(x) {
+  unlist(
+    lapply(x, 
+           function(.x) any(vapply(.x, is_list_col_reactive, logical(1)))
+    )
+  )
+}
