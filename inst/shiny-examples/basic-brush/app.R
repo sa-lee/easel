@@ -13,23 +13,6 @@ ui <- fluidPage(
   shiny::verbatimTextOutput("cl")
 )
 
-update <- reactive({ 
-  ranges <- cols_reactive$event[[1]]()
-  if (is.null(ranges)) {
-    aes_fill <- "steelblue"
-  } else {
-    xrange <- ranges[c(1,2)]
-    yrange <- ranges[c(3,4)]
-    aes_fill <- dplyr::if_else(
-      dplyr::between(pl$layer$aes_x, xrange[1], xrange[2]) &
-        dplyr::between(pl$layer$aes_y, yrange[2], yrange[1]),
-      "red",
-      "steelblue"
-    )
-  }
-  aes_fill
-})
-
 server <- function(input, output, session) {
   
   data <- mtcars %>%
