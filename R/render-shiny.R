@@ -14,12 +14,7 @@ render_shiny <- function(x) {
   
   server <- function(input, output, session) {
     
-    spec <- reactive({
-      pl$layer$aes_fill <- data()
-      to_vg_spec(pl) 
-    })
-    
-    data <- reactive({ 
+    update <- reactive({ 
       ranges <- cols_reactive$event[[1]]()
       if (is.null(ranges)) {
         aes_fill <- "steelblue"
@@ -43,7 +38,7 @@ render_shiny <- function(x) {
     output$vis <- vegawidget::renderVegawidget({
       vegawidget::vw_add_signal_listener(
         vegawidget::vw_add_signal_listener(
-          vegawidget::vegawidget(vegawidget::as_vegaspec(spec()), 
+          vegawidget::vegawidget(vegawidget::as_vegaspec(to_vg_spec(pl)), 
                                  height = 400, 
                                  width = 400),
           "drag_range_x"
@@ -53,7 +48,7 @@ render_shiny <- function(x) {
     })
     
     output$cl <- shiny::renderPrint({
-      spec()
+      update()
     })
     
   }
