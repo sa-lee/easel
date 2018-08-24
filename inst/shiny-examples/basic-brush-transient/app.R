@@ -48,6 +48,7 @@ server <- function(input, output, session) {
                               message = list(data = jsonlite::toJSON(source),
                                              hash = hash))
   })
+
   
   output$cl <- shiny::renderPrint({
     update()
