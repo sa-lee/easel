@@ -19,10 +19,10 @@ server <- function(input, output, session) {
     select(aes_x = hp, aes_y = mpg) 
   rownames(data) <- NULL
   
-  update <- reactive({
+  sel <- reactive({
     ranges <- c(input$drag_range_x, input$drag_range_y)
     if (is.null(ranges)) {
-      aes_fill <- rep("steelblue", 32)
+      return(rep(FALSE, nrow(data)))
     } else {
       x <- data$aes_x
       y <- data$aes_y
@@ -30,14 +30,26 @@ server <- function(input, output, session) {
       y <- unname(y)
       xrange <- ranges[c(1,2)]
       yrange <- ranges[c(3,4)]
-      aes_fill <- dplyr::if_else(
-        dplyr::between(x, xrange[1], xrange[2]) &
-          dplyr::between(y, yrange[2], yrange[1]),
-        "red",
-        "steelblue"
+      return(
+        dplyr::between(x, xrange[1], xrange[2]) & 
+          dplyr::between(y, yrange[2], yrange[1])
       )
     }
-    data[["aes_fill"]] <- aes_fill
+  })
+  
+  current_state <- reactive({
+    vapply(input$view_state$source, function(.x) .x[["sel"]], logical(1))
+  })
+  
+  update <- reactive({
+    state <- current_state()
+    if (length(state) == 0L) {
+      cur_sel <- sel()
+    } else {
+      cur_sel <- sel() | state
+    }
+    data[["sel"]] <- cur_sel
+    data[["aes_fill"]] <- dplyr::if_else(data[["sel"]], "red", "steelblue")
     data
   })
   
@@ -49,10 +61,8 @@ server <- function(input, output, session) {
                                              hash = hash))
   })
   
-  observeEvent(input$view_state, { print(input$view_state) })
-  
   output$cl <- shiny::renderPrint({
-    update()
+    current_state()
   })
 }
 
