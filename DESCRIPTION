@@ -5,7 +5,7 @@ Description: What the package does (one paragraph).
 Authors@R: person("Stuart", "Lee", , "lee.s@wehi.edu.au", c("aut", "cre"))
 License: Artistic-2.0
 Imports: dplyr, rlang, tibble
-Suggests: vegalite, shiny, ggplot2, jsonlite
+Suggests: vegawidget, shiny, ggplot2, jsonlite
 Encoding: UTF-8
 LazyData: true
 ByteCompile: true
