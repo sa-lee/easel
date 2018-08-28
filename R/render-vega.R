@@ -4,5 +4,7 @@ render_vega <- function(x) {
   spec <- jsonlite::toJSON(to_vg_spec(pl), 
                            pretty = TRUE, 
                            auto_unbox = TRUE)
-  vegalite::from_spec(spec)
+  
+  vegawidget::vegawidget(spec)
+
 }
