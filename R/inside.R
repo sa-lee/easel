@@ -1,11 +1,10 @@
-inside <- function(x, y, rect) {
-  reactive({
-    ranges <- rect()
+inside <- function(x, y, rect_model) {
+  
+  callback <- function(x, y, rect_model) ({
+    ranges <- rect_model
     if (is.null(ranges)) {
       return(rep(FALSE, length(x)))
     } else {
-      x <- unname(x)
-      y <- unname(y)
       xrange <- ranges[c(1,2)]
       yrange <- ranges[c(3,4)]
       return(
@@ -14,4 +13,9 @@ inside <- function(x, y, rect) {
       )
     }
   })
+  
+  rlang::fn_fmls(callback) <- list(x = x, 
+                                   y = y,
+                                   rect_model = rect_model)
+  callback
 }
