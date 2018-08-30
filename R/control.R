@@ -31,16 +31,20 @@ control_drag <- function(.data, id) { UseMethod("control_drag") }
 
 control_drag.tbl_pl <- function(.data, id) {
   fun <- function(.data, id) {
-    rect_model <- tibble::tibble(event = 
-                                   as_reactive_numeric(numeric(4),
-                                                       rlang::expr(
-                                                         c(input$vis_drag_range_x, 
-                                                           input$vis_drag_range_y))))
+    expr <- rlang::expr(
+      c(input$vis_drag_range_x, input$vis_drag_range_y)
+    )
+    
+    rect_model <- tibble::tibble(
+      event = as_reactive_numeric(numeric(4), expr)
+    )
+    
     tbl <- build_plibble(
       rect_model,
       rlang::quos(x = xmin, x2 = xmax, y = ymin, y2 = ymax),
       list(signal = vg_drag)
     )
+    
     tbl <- list(tbl)
     names(tbl) <- id
     c(.data, tbl)

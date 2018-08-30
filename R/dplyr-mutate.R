@@ -34,6 +34,9 @@ mutate_layer.tbl_pl <- function(.data, layer, ...) {
 
 # modify a specific layer in place
 mutate_at_layer <- function(.data, node, ...) {
-  .data[[node]] <- mutate(.data[[node]], ...)
+  env <- as_environment(.data, caller_env())
+  new_cols <- enquos(..., .named = TRUE)
+  new_cols <- lapply(new_cols, quo_set_env, env = env)
+  .data[[node]] <- mutate(.data[[node]], !!!new_cols)
   .data
 }

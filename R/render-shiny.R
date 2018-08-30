@@ -44,12 +44,10 @@ render_shiny <- function(x) {
       vl 
     })
     
-    brush <- reactive({get_reactive_expr(which_reactives[[1]]$event)},
-                      quoted = TRUE)
-    
+    brush <-  shiny::reactive({get_reactive_expr(which_reactives[[1]]$event)},
+                              quoted = TRUE)
     output$cl <- shiny::renderPrint({
       brush()
-      
     })
     
   }
