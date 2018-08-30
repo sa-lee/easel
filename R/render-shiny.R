@@ -18,11 +18,12 @@ render_shiny <- function(x) {
                              function(.) .[["name"]], 
                              character(1))
 
-  layer_has_reactives <- which_signals(pl)
-  
-  which_reactives <- lapply(pl[layer_has_reactives], 
+  which_reactives <- lapply(pl, 
                             function(x) dplyr::select_if(x, has_reactive_attr)
   )
+  which_reactives <- Filter(function(.) ncol(.) > 0, which_reactives)
+  
+  print(which_reactives)
   
   
   ui <- shiny::fluidPage(
@@ -44,7 +45,7 @@ render_shiny <- function(x) {
       vl 
     })
     
-    brush <-  shiny::reactive({get_reactive_expr(which_reactives[[1]]$event)},
+    brush <-  shiny::reactive({get_reactive_expr(which_reactives[[1]]$sel)},
                               quoted = TRUE)
     output$cl <- shiny::renderPrint({
       brush()

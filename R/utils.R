@@ -42,7 +42,7 @@ is_list_col_reactive <- function(x) {
 which_signals <- function(x) {
   unlist(
     lapply(x, 
-           function(.x) any(vapply(.x, has_reactive_attr, logical(1)))
+           function(.) any(grepl("signal", names(get_pipeline(.))))
     )
   )
 }
