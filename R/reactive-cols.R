@@ -5,7 +5,7 @@ as_reactive_logical <- function(x, expr) {
 }
 
 new_reactive_lgl  <- function(x, expr) {
-  stopifnot(shiny::is.reactive(expr))
+  stopifnot(rlang::is_expression(expr))
   structure(x, 
             class = c("reactive_lgl", "logical"),
             expr = expr)
@@ -21,7 +21,7 @@ as_reactive_numeric <- function(x, expr) {
 }
 
 new_reactive_num <- function(x, expr) {
-  stopifnot(shiny::is.reactive(expr))
+  stopifnot(rlang::is_expression(expr))
   structure(x, 
             class = c("reactive_num", "numeric"),
             expr = expr)

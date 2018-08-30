@@ -64,7 +64,7 @@ to_vg_spec <- function(.tbl) {
       names(opts_data) <- gsub("opts_", "", names(opts_data))
       opts_list <- lapply(names(opts_data),
                           function(col) {
-                           list(value = opts_data[[col]])
+                           list(value = opts_data[[col]][1])
                           })
       names(opts_list) <- names(opts_data)
       signal_encoding <- c(signal_encoding, opts_list)

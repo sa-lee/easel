@@ -25,6 +25,14 @@ right_na <- function(type) {
          complex = NA_complex_)
 }
 
+get_reactive_expr <- function(x) {
+  attr(x, "expr")
+}
+
+has_reactive_attr <- function(x) {
+  !is.null(get_reactive_expr(x))
+}
+
 is_list_col_reactive <- function(x) {
   if (is.list(x)) 
     return(shiny::is.reactivevalues(x[[1]]))
@@ -34,7 +42,7 @@ is_list_col_reactive <- function(x) {
 which_signals <- function(x) {
   unlist(
     lapply(x, 
-           function(.x) any(vapply(.x, is_list_col_reactive, logical(1)))
+           function(.x) any(vapply(.x, has_reactive_attr, logical(1)))
     )
   )
 }

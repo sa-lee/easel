@@ -33,10 +33,9 @@ control_drag.tbl_pl <- function(.data, id) {
   fun <- function(.data, id) {
     rect_model <- tibble::tibble(event = 
                                    as_reactive_numeric(numeric(4),
-                                                       shiny::reactive({
-                                                         c(input$drag_range_x, 
-                                                           input$drag_range_y)
-                                                       })))
+                                                       rlang::expr(
+                                                         c(input$vis_drag_range_x, 
+                                                           input$vis_drag_range_y))))
     tbl <- build_plibble(
       rect_model,
       rlang::quos(x = xmin, x2 = xmax, y = ymin, y2 = ymax),

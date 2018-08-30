@@ -1,11 +1,17 @@
 render_shiny <- function(x) {
-
   pl <- eval_pipeline(x)
+  spec <- to_vg_spec(pl)
   
-  signals_loc <- which_signals(pl)
+  signal_listeners <- vapply(spec$signals, 
+                             function(.) .[["name"]], 
+                             character(1))
+
+  layer_has_reactives <- which_signals(pl)
   
-  signals_reactives <- pl[signals_loc]
-  cols_reactive <- signals_reactives[[1]]
+  which_reactives <- lapply(pl[layer_has_reactives], 
+                            function(x) dplyr::select_if(x, has_reactive_attr)
+  )
+  
   
   ui <- shiny::fluidPage(
     vegawidget::vegawidgetOutput("vis"),
@@ -14,41 +20,24 @@ render_shiny <- function(x) {
   
   server <- function(input, output, session) {
     
-    update <- reactive({ 
-      ranges <- cols_reactive$event[[1]]()
-      if (is.null(ranges)) {
-        aes_fill <- "steelblue"
-      } else {
-        xrange <- ranges[c(1,2)]
-        yrange <- ranges[c(3,4)]
-        aes_fill <- dplyr::if_else(
-          dplyr::between(pl$layer$aes_x, xrange[1], xrange[2]) &
-            dplyr::between(pl$layer$aes_y, yrange[2], yrange[1]),
-          "red",
-          "steelblue"
-        )
-      }
-      aes_fill
-    })
-    
-    cols_reactive$event[[1]] <-  reactive({
-      c(input$vis_drag_range_x, input$vis_drag_range_y)
-    })
-    
     output$vis <- vegawidget::renderVegawidget({
-      vegawidget::vw_add_signal_listener(
-        vegawidget::vw_add_signal_listener(
-          vegawidget::vegawidget(vegawidget::as_vegaspec(to_vg_spec(pl)), 
-                                 height = 400, 
-                                 width = 400),
-          "drag_range_x"
-        ),
-        "drag_range_y"
-      )
+      
+      vl <- vegawidget::vegawidget(vegawidget::as_vegaspec(spec), 
+                                   height = 400, 
+                                   width = 400)
+      
+      for (signal in signal_listeners) {
+        vl <- vegawidget::vw_add_signal_listener(vl, signal)
+      }
+      vl 
     })
+    
+    brush <- reactive({get_reactive_expr(which_reactives[[1]]$event)},
+                      quoted = TRUE)
     
     output$cl <- shiny::renderPrint({
-      update()
+      brush()
+      
     })
     
   }
