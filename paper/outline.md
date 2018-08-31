@@ -22,12 +22,12 @@ Why is interactivity useful for exploratory data analysis? See work by Di and He
 
 Putting our work in context. Prior work in the stat computing literature (ggplot2, lattice, plotly, gggobi, manet, mondrian, cranvas, orca) and the info vis literature (altair, d3, vega, vega-lite, and many more). Client side vs server side computation. Reactive programming. Events and signals. Graphics pipeline from the plumbing paper. 
 
-Given the multitude of different software available to produce interactive visualisations why do we need another one? Several answers I can think of: grammars are cognitive tools that enable high-level reasoning, (compared to info vis approaches) tight integration with statistical computing environment, just enough control (compared to stat computing approaches).
+Given the multitude of different software available to produce interactive visualisations why do we need another one? Several answers I can think of: grammars are cognitive tools that enable high-level reasoning, (compared to info vis approaches) tight integration with statistical computing environment, just enough control (compared to stat computing approaches). Taken together the grammar provies a low level framework for performing graphics research, it enables new interactives to be created and software built on top of it.
 
 
 ## Design
 
-Each paragraph highlights key design ideas that we have adapted or contributed 
+Each paragraph highlights key design ideas that we have adapted or contributed. 
 
 ### Graphics from data and data from graphics
 
@@ -81,10 +81,9 @@ explicitly making data mutable
 
 The control verb specifies an event in the context of the data, like a click or a drag, to be observed on the visualisation. These functions emit events in data space so they can then be passed to other grammar elements.
 
-##### manipulation of state via `mutate_referential`   
+##### manipulation of state via mutate_persistent   
 
-Explicit handling of how state manipulations are inherently recursive, hence mutations should be self referential. 
-
+Explicit handling of how state manipulations are inherently recursive, hence mutations should be self referential. Another verb option is _insist_.
 ## Examples
 
 When does a scatter plot become a brushed scatter plot?
@@ -120,7 +119,7 @@ Become a persistently highlighted brushed scatter plot?
 ```r
 scatter <- scatter %>% 
 				mutate(sel = FALSE) %>%
-				mutate_referential(
+				mutate_persistent(
 					sel = sel | inside(aes_x, aes_y, brush),
 					aes_fill = ifelse(sel, "red", "black")
 			   )
