@@ -8,7 +8,7 @@ inside <- function(x, y, rect_model) {
   expr <- rlang::expr({
     ranges <- !!rect_model
     if (is.null(ranges)){
-      return(rep(FALSE, length(x)))
+      return(rep(FALSE, length(!!x)))
     } else {
       xrange <- ranges[c(1,2)]
       yrange <- ranges[c(3,4)]

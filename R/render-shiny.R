@@ -23,9 +23,6 @@ render_shiny <- function(x) {
   )
   which_reactives <- Filter(function(.) ncol(.) > 0, which_reactives)
   
-  print(which_reactives)
-  
-  
   ui <- shiny::fluidPage(
     vegawidget::vegawidgetOutput("vis"),
     shiny::verbatimTextOutput("cl")
@@ -42,13 +39,26 @@ render_shiny <- function(x) {
       for (signal in signal_listeners) {
         vl <- vegawidget::vw_add_signal_listener(vl, signal)
       }
-      vl 
+      vegawidget::vw_update_data(vl, "source", updates()) 
     })
     
-    brush <-  shiny::reactive({get_reactive_expr(which_reactives[[1]]$sel)},
+    # selection stages
+    
+    sel <-  shiny::reactive({get_reactive_expr(which_reactives[[1]]$sel)},
                               quoted = TRUE)
+    
+    parse_new_data <- rlang::fn_fmls(get_pipeline(x)$mutate_layer)$dots
+    parse_new_data <- parse_new_data[grep("^aes", names(parse_new_data))] 
+    
+    updates <- shiny::reactive({
+      lapply(parse_new_data, function(.) rlang::env_bind(quo_get_env(.),
+                                                         sel = sel()))
+      mutate(pl$layer[, grep("^aes", names(pl$layer))], !!!parse_new_data)
+    })
+    
+    
     output$cl <- shiny::renderPrint({
-      brush()
+      updates()
     })
     
   }
