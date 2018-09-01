@@ -15,14 +15,14 @@
 
 ## Introduction
 
-Motivations for designing a grammar, where the emphaisis is on interactivity (in terms of both manipulating a visualisation and incorporating visualisations into a data analysis workflow) rather than a polished product or graphical user interface. I see this as the core difference between vis software that is written by statisticians vs computer scientists.  
+Motivations for designing a grammar, where the emphasis is on interactivity (in terms of both manipulating a visualisation and incorporating visualisations into a data analysis workflow) rather than a polished product or graphical user interface. I see this as the core difference between vis software that is written by statisticians vs computer scientists.  
 
 Why is interactivity useful for exploratory data analysis? See work by Di and Heike like _Removing the blindfold_, the papers by Cleveland on brushing scatterplots, Tukey's work on Prism9 and I'm sure many more...
 
 
 Putting our work in context. Prior work in the stat computing literature (ggplot2, lattice, plotly, gggobi, manet, mondrian, cranvas, orca) and the info vis literature (altair, d3, vega, vega-lite, and many more). Client side vs server side computation. Reactive programming. Events and signals. Graphics pipeline from the plumbing paper. 
 
-Given the multitude of different software available to produce interactive visualisations why do we need another one? Several answers I can think of: grammars are cognitive tools that enable high-level reasoning, (compared to info vis approaches) tight integration with statistical computing environment, just enough control (compared to stat computing approaches). Taken together the grammar provies a low level framework for performing graphics research, it enables new interactives to be created and software built on top of it.
+Given the multitude of different software available to produce interactive visualisations why do we need another one? Several answers I can think of: grammars are cognitive tools that enable high-level reasoning, (compared to info vis approaches) tight integration with statistical computing environment, just enough control (compared to stat computing approaches). Taken together the grammar provides a low level framework for performing graphics research, it enables new interactive graphics to be created and software built on top of it.
 
 
 ## Design
@@ -39,7 +39,7 @@ And are generated via the context of the aesthetic mappings. State is manipulate
 
 
 ### Deferred evaluation
-Every transformation generates a callback function that is only evaluated upon rendering. It would be cool to be able to actually modify these in real time alongside the visualisation (turns out you could actaully do something like this in the [70s!](http://www.righto.com/2017/10/the-xerox-alto-smalltalk-and-rewriting.html)).
+Every transformation generates a callback function that is only evaluated upon rendering. It would be cool to be able to actually modify these in real time alongside the visualisation (turns out you could actually do something like this in the [70s!](http://www.righto.com/2017/10/the-xerox-alto-smalltalk-and-rewriting.html)).
 
 ### Pushing computation client side
 
@@ -65,11 +65,11 @@ Here we can precompute any statistical transformations and make them independent
 
 ##### Group by
 
-`group_by` partitions aesthetics by subsets of the data, any downstream calls act on each paritition. Do groups create facets?
+`group_by` partitions aesthetics by subsets of the data, any downstream calls act on each partition. Do groups create facets?
 
 ##### Mesh
 
-For adding independent data layers, we could introduce a newdata argument to the `draw_` functions except that seems like the inheritance of aes terms could get tricky. Instead we use  `mesh` to combine pipepline stages.
+For adding independent data layers, we could introduce a newdata argument to the `draw_` functions except that seems like the inheritance of aes terms could get tricky. Instead we use  `mesh` to combine pipeline stages.
 
 
 #### Interactive grammar elements
@@ -84,6 +84,7 @@ The control verb specifies an event in the context of the data, like a click or 
 ##### manipulation of state via mutate_persistent   
 
 Explicit handling of how state manipulations are inherently recursive, hence mutations should be self referential. Another verb option is _insist_.
+
 ## Examples
 
 When does a scatter plot become a brushed scatter plot?
@@ -136,7 +137,7 @@ Amount of control given to a user? - at the minimum returning event data to the 
 
 Representation of pipeline stages? - pipelines are not linear but are DAGs 
 
-Representaion of multiple views?
+Representation of multiple views?
 
 
 
