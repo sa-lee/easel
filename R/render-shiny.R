@@ -2,14 +2,16 @@
 #' vis <- mtcars %>% visualise(x = hp, y = mpg) %>% draw_points()
 #' vis_b <- vis %>% control_drag("brush") %>% draw_rect()
 #' transient brush with highlight
-#' vis_t <- vis_b %>% mutate_layer("points", 
-#'                                 sel = inside(aes_x, aes_y, .brush$event),
-#'                                 aes_fill = ifelse(sel, "black", "white")
-#'                                 )
+#' vis_t <- vis %>% mutate(
+#'                          sel = inside(aes_x, aes_y, vis_b$event),
+#'                          aes_fill = ifelse(sel, "black", "white")
+#'                         ) %>%
+#'                         mesh(vis_b)
 #' persisent selection brush
-#' vis_p <- vis_b %>% 
-#'                mutate_layer("points", sel = FALSE) %>% 
-#'                let(sel = sel | inside(aes_x, aes_y, .brush$event))
+#' vis_p <- vis %>% 
+#'                mutate(sel = FALSE) %>% 
+#'                mutate_persistent(sel = sel | inside(aes_x, aes_y, vis_b$event)) %>%
+#'                mesh(vis_b)
 render_shiny <- function(x) {
   pl <- eval_pipeline(x)
   spec <- to_vg_spec(pl)
