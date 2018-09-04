@@ -118,7 +118,7 @@ to_vg_spec <- function(.tbl) {
   scaffold$marks[[1]] <- list(
     type = "symbol",
     from = list(data = scaffold$data[[1]]$name),
-    encode = list(enter = encodings)
+    encode = list(update = encodings)
   )
   
   scaffold$marks <- c(signal_marks, scaffold$marks)

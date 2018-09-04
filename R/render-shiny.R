@@ -31,21 +31,19 @@ render_shiny <- function(x) {
   )
   
   server <- function(input, output, session) {
+    vl <- vegawidget::vegawidget(spec, 
+                                 height = 400, 
+                                 width = 400)
     
+    for (signal in signal_listeners) {
+      vl <- vegawidget::vw_add_signal_listener(vl, signal)
+    }
+
     output$vis <- vegawidget::renderVegawidget({
-      
-      vl <- vegawidget::vegawidget(vegawidget::as_vegaspec(spec), 
-                                   height = 400, 
-                                   width = 400)
-      
-      for (signal in signal_listeners) {
-        vl <- vegawidget::vw_add_signal_listener(vl, signal)
-      }
-      vegawidget::vw_update_data(vl, "source", updates()) 
+      vl 
     })
     
     # selection stages
-    
     sel <-  shiny::reactive({get_reactive_expr(which_reactives[[1]]$sel)},
                               quoted = TRUE)
     
@@ -55,9 +53,20 @@ render_shiny <- function(x) {
     updates <- shiny::reactive({
       lapply(parse_new_data, function(.) rlang::env_bind(quo_get_env(.),
                                                          sel = sel()))
-      mutate(pl$layer[, grep("^aes", names(pl$layer))], !!!parse_new_data)
+      changeset <- mutate(pl$layer[, grep("^aes", names(pl$layer))], 
+                        !!!parse_new_data)
+      jsonlite::toJSON(changeset, dataframe = "rows")
     })
     
+
+    observe({
+      changeset <- updates()
+      vegawidget:::vw_call_view("vis", "change", 
+                                list(name = "source", 
+                                     data = changeset)
+                                )
+      
+    })
     
     output$cl <- shiny::renderPrint({
       updates()
