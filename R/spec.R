@@ -27,6 +27,11 @@ vg_scaffold <- function(width, height) {
 
 # a very minimal vega spec, for a single layer only!
 to_vg_spec <- function(.tbl) {
+  
+  if (inherits(.tbl, "tbl_pl")) {
+    .tbl <- plibble_list(list(.tbl))
+  }
+  
   scaffold <- vg_scaffold()
   
   signals_loc <- which_signals(.tbl)

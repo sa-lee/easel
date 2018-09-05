@@ -1,6 +1,6 @@
 #' just a brush
 #' vis <- mtcars %>% visualise(x = hp, y = mpg) %>% draw_points()
-#' vis_b <- vis %>% control_drag() %>% draw_rect()
+#' brush <-  control_drag() %>% draw_rect(fill = "transparent", stroke = "black")
 #' transient brush with highlight
 #' vis_t <- vis %>% mutate(
 #'                          sel = inside(aes_x, aes_y, vis_b$event),
@@ -19,17 +19,14 @@ render_shiny <- function(x) {
   signal_listeners <- vapply(spec$signals, 
                              function(.) .[["name"]], 
                              character(1))
-  which_reactives <- lapply(pl, 
+  which_reactives <- lapply(pl[which_encodings(pl)], 
                             function(x) dplyr::select_if(x, has_reactive_attr)
-  )
+                            )
+  
   which_reactives <- Filter(function(.) ncol(.) > 0, which_reactives)
   
-  
-  
-  
   ui <- shiny::fluidPage(
-    vegawidget::vegawidgetOutput("vis"),
-    shiny::verbatimTextOutput("cl")
+    vegawidget::vegawidgetOutput("vis")
   )
   
   server <- function(input, output, session) {
@@ -77,15 +74,7 @@ render_shiny <- function(x) {
         
       })
     }
- 
-    output$cl <- shiny::renderPrint({ 
-      list(
-        c(input$vis_drag_range_x, input$vis_drag_range_y),
-        sel(),
-        jsonlite::fromJSON(updates())
-      )
-    })
-    
   }
+  
   shiny::shinyApp(ui, server)
 }
