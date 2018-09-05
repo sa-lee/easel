@@ -17,10 +17,9 @@ visualise.mutibble <- function(.data, ...) {
 
 .visualise <- function(.data) {
   # append "aes" to variable names
-  .tbl <- plibble_list(list(root = .data))
   mapping <- get_mapping(.data)
   aes_vars <- mapping
   names(aes_vars) <- paste0("aes_", names(aes_vars))
   # need to include checks for validity here
-  c(.tbl, list(layer = transmute(.data, !!!aes_vars)))
+  mutate_eager(.data, !!!aes_vars)
 }

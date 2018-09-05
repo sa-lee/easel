@@ -7,13 +7,28 @@ dplyr::mutate
 #' @export
 dplyr::transmute
 
+mutate_eager <- function(.data, ...) UseMethod("mutate_eager")
+
+mutate_eager.tbl_pl <- function(.data, ...) {
+  class(.data) <- class(.data)[-1]
+  update <- mutate(.data, ...)
+  update_plibble(update, get_mapping(.data), get_pipeline(.data))
+}
+
+mutate_deferred <- function(.data, ...) UseMethod("mutate_deferred")
+
+mutate_deferred.tbl_pl <- function(.data, ...) {
+  dots <- rlang::enquos(..., .named = TRUE)
+  .mutate <- function(.data, dots) {
+    mutate_eager(.data, !!!dots)
+  }
+  rlang::fn_fmls(.mutate)[2] <- list(dots = dots)
+  set_pipeline(.data, list(mutate = .mutate))
+} 
 
 #' @method mutate tbl_pl
 #' @export
-mutate.tbl_pl <- function(.data, ...) {
-  update <- NextMethod()
-  update_plibble(update, get_mapping(.data), get_pipeline(.data))
-}
+mutate.tbl_pl <- mutate_deferred.tbl_pl
 
 #' @method transmute tbl_pl
 transmute.tbl_pl <- function(.data, ...) {
@@ -24,12 +39,7 @@ transmute.tbl_pl <- function(.data, ...) {
 mutate_layer <- function(.data, layer, ...) UseMethod("mutate_layer")
 
 mutate_layer.tbl_pl <- function(.data, layer, ...) {
-  dots <- rlang::enquos(..., .named = TRUE)
-  .mutate <- function(.data, layer, dots) {
-    mutate_at_layer(.data, layer, !!!dots)
-  }
-  rlang::fn_fmls(.mutate)[c(2,3)] <- list(layer = layer, dots = dots)
-  set_pipeline(.data, list(mutate_layer = .mutate))
+
 }
 
 # modify a specific layer in place
