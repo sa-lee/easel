@@ -33,12 +33,19 @@ c.function_list <- function(..., recursive = FALSE) {
   new_funlist(NextMethod())
 }
 
-eval_pipeline <- function(x) {
-  pipeline <- attr(x, "pipeline")
-  for (i in seq_along(pipeline)) {
-    x <- pipeline[[i]](x)
+invoke_pipeline <- function(.data) UseMethod("invoke_pipeline")
+
+invoke_pipeline.tbl_pl <- function(.data) {
+  pipeline <- get_pipeline(.data)
+  for (fun in pipeline) {
+    .data <- fun(.data)
   }
-  x
+  .data
 }
+
+invoke_pipeline.tbl_pl_list <- function(.data) {
+    lapply(.data, invoke_pipeline)
+}
+
 
 

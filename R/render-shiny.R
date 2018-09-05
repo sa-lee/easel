@@ -13,7 +13,7 @@
 #'                mutate_persistent(sel = sel | inside(aes_x, aes_y, vis_b$event)) %>%
 #'                mesh(vis_b)
 render_shiny <- function(x) {
-  pl <- eval_pipeline(x)
+  pl <- invoke_pipeline(x)
   spec <- to_vg_spec(pl)
   
   signal_listeners <- vapply(spec$signals, 
