@@ -27,36 +27,28 @@ control_click.mutibble <- function(.data, handler) {
 }
 
 
-control_drag <- function(.data, id) { UseMethod("control_drag") }
+control_drag <- function(.data) { UseMethod("control_drag") }
 
 control_drag.tbl_pl <- function(.data, id) {
-  fun <- function(.data, id) {
-    expr <- rlang::expr(
-      c(input$vis_drag_range_x, input$vis_drag_range_y)
-    )
-    
-    rect_model <- tibble::tibble(
-      event = as_reactive_numeric(numeric(4), expr)
-    )
-    
-    tbl <- build_plibble(
-      rect_model,
-      rlang::quos(x = xmin, x2 = xmax, y = ymin, y2 = ymax),
-      list(signal = vg_drag)
-    )
-    
-    tbl <- list(tbl)
-    names(tbl) <- id
-    c(.data, tbl)
-  }
-  rlang::fn_fmls(fun)[2] <- list(id = id)
+  # check that has mapping that respects x,y aesthetics
+  mapping <- get_mapping(.data)
+  stopifnot(names(mapping) %in% c("x", "y"))
   
+  # this is eagerly evaluated not a callback,
+  # invoking control_drag will return a new plibble
+  expr <- rlang::expr(
+    c(input$vis_drag_range_x, input$vis_drag_range_y)
+  )
   
-  set_pipeline(.data, list(control_drag = fun))
-}
-
-control_drag.mutibble <- function(.data, handler) {
-  .data$.tbl <- set_pipeline(.data$.tbl, list(control_drag = handler))
-  .data
+  rect_model <- tibble::tibble(
+    event = as_reactive_numeric(numeric(4), expr)
+  )
+  
+  build_plibble(
+    rect_model,
+    rlang::quos(x = xmin, x2 = xmax, y = ymin, y2 = ymax),
+    list(signal = vg_drag)
+  )
+  
 }
 
