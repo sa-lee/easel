@@ -33,5 +33,12 @@ c.function_list <- function(..., recursive = FALSE) {
   new_funlist(NextMethod())
 }
 
+eval_pipeline <- function(x) {
+  pipeline <- attr(x, "pipeline")
+  for (i in seq_along(pipeline)) {
+    x <- pipeline[[i]](x)
+  }
+  x
+}
 
 
