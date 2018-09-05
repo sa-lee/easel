@@ -44,10 +44,14 @@ control_drag.tbl_pl <- function(.data, id) {
     event = as_reactive_numeric(numeric(4), expr)
   )
   
+  signal_callback <- function(.data) {
+    build_plibble(.data, get_mapping(.data), list(signal = vg_drag))
+  }
+  
   build_plibble(
     rect_model,
     rlang::quos(x = xmin, x2 = xmax, y = ymin, y2 = ymax),
-    list(signal = vg_drag)
+    list(signal = signal_callback)
   )
   
 }
