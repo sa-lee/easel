@@ -78,14 +78,21 @@ to_vg_spec <- function(.tbl) {
     )
   }
 
+  data_marks <- which_encodings(.tbl)
+  
+  if (sum(data_marks) != 1) {
+    stop("multiple layers not currently supported")
+  }
+  
+  layer <- .tbl[data_marks][[1]]
   
   scaffold$data[[1]] <- list(
     name = "source",
-    values = dplyr::select(.tbl$layer, dplyr::starts_with("aes"))
+    values = dplyr::select(layer, dplyr::starts_with("aes"))
   )
   
   aes_nms <- names(scaffold$data[[1]]$values)
-  geoms <- .tbl$layer$geom[1]
+  geoms <- layer$geom[1]
   scaffold$scales <- vector("list", length(setdiff(aes_nms,c("aes_x", "aes_x"))))
   encodings <- vector("list", length(aes_nms))
   names(encodings) <- gsub("aes_", "", aes_nms)

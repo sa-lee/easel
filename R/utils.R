@@ -38,3 +38,11 @@ which_signals <- function(x) {
     )
   )
 }
+
+which_encodings <- function(x) {
+  vapply(x,
+        function(.) any(grepl("^aes", names(.))),
+        logical(1)
+  )
+  
+}
