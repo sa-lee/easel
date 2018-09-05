@@ -19,8 +19,6 @@ render_shiny <- function(x) {
   signal_listeners <- vapply(spec$signals, 
                              function(.) .[["name"]], 
                              character(1))
-  
-  print(signal_listeners)
   which_reactives <- lapply(pl, 
                             function(x) dplyr::select_if(x, has_reactive_attr)
   )
@@ -51,36 +49,35 @@ render_shiny <- function(x) {
     })
     
     # selection stages
-    layer <- dplyr::select(pl[[1]], dplyr::starts_with("aes"))
-    
-    sel <-  shiny::reactive({
-      get_reactive_expr(which_reactives[[1]]$sel)
-    }, quoted = TRUE)
-    
-    print(sel)
-    parse_new_data <- rlang::fn_fmls(get_pipeline(layer)$mutate)$dots
-    parse_new_data <- parse_new_data[grep("^aes", names(parse_new_data))] 
-    
-    print(parse_new_data)
-    updates <- shiny::reactive({
-      lapply(parse_new_data, 
-                               function(.) rlang::env_bind(quo_get_env(.),
-                                                         sel = sel()))
-      newdata <- lapply(parse_new_data, eval_tidy)
-      changeset <- mutate_eager(layer, !!!newdata)
-      jsonlite::toJSON(changeset, dataframe = "rows")
-    })
-    
-    
-    observe({
-      changeset <- updates()
-      vegawidget:::vw_call_view("vis", "change",
-                                list(name = "source",
-                                     data = changeset)
-      )
-
-    })
-    
+    if (length(which_reactives) > 0) {
+      layer <- dplyr::select(pl[[1]], dplyr::starts_with("aes"))
+      
+      sel <-  shiny::reactive({
+        get_reactive_expr(which_reactives[[1]]$sel)
+      }, quoted = TRUE)
+      
+      parse_new_data <- rlang::fn_fmls(get_pipeline(layer)$mutate)$dots
+      parse_new_data <- parse_new_data[grep("^aes", names(parse_new_data))] 
+      
+      updates <- shiny::reactive({
+        lapply(parse_new_data, 
+               function(.) rlang::env_bind(quo_get_env(.),
+                                           sel = sel()))
+        
+        changeset <- mutate_eager(layer, !!!parse_new_data)
+        jsonlite::toJSON(changeset, dataframe = "rows")
+      })
+      
+      observe({
+        changeset <- updates()
+        vegawidget:::vw_call_view("vis", "change",
+                                  list(name = "source",
+                                       data = changeset)
+        )
+        
+      })
+    }
+ 
     output$cl <- shiny::renderPrint({ 
       list(
         c(input$vis_drag_range_x, input$vis_drag_range_y),
