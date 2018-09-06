@@ -19,17 +19,24 @@ as_reactive_logical.logical <- function(x, expr) {
 #' adapated from Ops.numeric_version and Jim Hester's code in bench repo
 Ops.reactive_lgl <- function (e1, e2) {
   if (nargs() == 1L) {
-    stop(
-      sprintf("unary '%s' not defined for \"reactive_lgl\" objects", .Generic),
-         call. = FALSE
+    if (.Generic != "!") {
+      stop(
+        sprintf("unary '%s' not defined for \"reactive_lgl\" objects", .Generic),
+        call. = FALSE
       )
+    }
+    e1_expr <- get_reactive_expr(e1)
+    ops_expr <- rlang::quo(
+      match.fun(!!.Generic)(!!e1_expr)
+    )
+    value <- NextMethod(.Generic)
+    return(as_reactive_logical(value, ops_expr))
   }
   
   boolean <- switch(.Generic,
                     `==` = TRUE,
                     `|` = TRUE,
                     `&` = TRUE,
-                    `!` = TRUE,
                     `!=` = TRUE,
                     `<` = TRUE,
                     `>` = TRUE,
