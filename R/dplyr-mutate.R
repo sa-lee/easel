@@ -44,25 +44,3 @@ mutate_persistent.tbl_pl <- function(.data, ...) {
   set_pipeline(.data, list(mutate_persistent = .mutate))
 
 }
-
-
-#' @method transmute tbl_pl
-transmute.tbl_pl <- function(.data, ...) {
-  update <- NextMethod()
-  build_plibble(update, get_mapping(.data), get_pipeline(.data))
-}
-
-mutate_layer <- function(.data, layer, ...) UseMethod("mutate_layer")
-
-mutate_layer.tbl_pl <- function(.data, layer, ...) {
-
-}
-
-# modify a specific layer in place
-mutate_at_layer <- function(.data, node, ...) {
-  env <- as_environment(.data, caller_env())
-  new_cols <- enquos(..., .named = TRUE)
-  new_cols <- lapply(new_cols, quo_set_env, env = env)
-  .data[[node]] <- mutate(.data[[node]], !!!new_cols)
-  .data
-}

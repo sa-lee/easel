@@ -33,7 +33,7 @@ vg_drag <- function() {
            ),
            list(
              events = "[mousedown, window:mouseup] > window:mousemove",
-             update= "{xmin: drag.xmin, xmax: clamp(x(), 0, width), ymin: drag.ymin, ymax:clamp(y(), 0, height)}"
+             update = "{xmin: drag.xmin, xmax: clamp(x(), 0, width), ymin: drag.ymin, ymax:clamp(y(), 0, height)}"
            )
          )
     ),
@@ -54,6 +54,34 @@ vg_drag <- function() {
              update = "invert('aes_y', [drag.ymin, drag.ymax])"
            )
          )
+    )
+  )
+}
+
+vg_click <- function() {
+  list(
+    list(name = "click",
+         value = 0,
+         on = list(
+           events = "click",
+           update = "{xmin: }"
+         )
+         ),
+    list(
+      name = "click_range_x",
+      value = 0,
+      on = list(
+        events = list(signal =  "click"),
+        update = "invert('x', click.x)" 
+      )
+    ),
+    list(
+      name = click_range_y,
+      value = 0,
+      on = list(
+        events = list(signal = "click"),
+        update = "invert('y', click.y)" 
+      )
     )
   )
 }
