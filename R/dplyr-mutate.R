@@ -30,6 +30,22 @@ mutate_deferred.tbl_pl <- function(.data, ...) {
 #' @export
 mutate.tbl_pl <- mutate_deferred.tbl_pl
 
+
+#' persistent mutation (occurs at run time)
+mutate_persistent <- function(.data, ...) UseMethod("mutate_persistent")
+
+mutate_persistent.tbl_pl <- function(.data, ...) {
+  dots <- rlang::enquos(..., .named = TRUE)
+  .mutate <- function(.data, dots) {
+    mutate_eager(.data, !!!dots)
+  }
+  rlang::fn_fmls(.mutate)[2] <- list(dots = dots)
+  
+  set_pipeline(.data, list(mutate_persistent = .mutate))
+
+}
+
+
 #' @method transmute tbl_pl
 transmute.tbl_pl <- function(.data, ...) {
   update <- NextMethod()

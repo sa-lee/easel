@@ -5,7 +5,10 @@ inside <- function(x, y, rect_model) {
   
   base_case <- rep(FALSE, length(x))
   
-  expr <- rlang::expr({
+  x <- enquo(x)
+  y <- enquo(y)
+  
+  expr <- rlang::quo({
     ranges <- !!rect_model
     if (is.null(ranges)){
       return(rep(FALSE, length(!!x)))
