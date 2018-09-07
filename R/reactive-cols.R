@@ -4,6 +4,22 @@ as_reactive_logical <- function(x, expr) {
   UseMethod("as_reactive_logical")
 }
 
+get_reactive_expr <- function(x) {
+  expr <- attr(x, "expr")
+  if (inherits(expr, "quosure")) {
+    return(rlang::quo_get_expr(expr))
+  }
+  expr
+}
+
+get_reactive_env <- function(x) {
+  expr <- attr(x, "expr")
+  if (inherits(expr, "quosure")) {
+    return(rlang::quo_get_env(expr))
+  }
+  rlang::get_env()
+}
+
 new_reactive_lgl  <- function(x, expr) {
   stopifnot(rlang::is_expression(expr))
   structure(x, 
@@ -26,8 +42,9 @@ Ops.reactive_lgl <- function (e1, e2) {
       )
     }
     e1_expr <- get_reactive_expr(e1)
+    f <- as_closure(.Generic)
     ops_expr <- rlang::quo(
-      match.fun(!!.Generic)(!!e1_expr)
+      f(!!e1_expr)
     )
     value <- NextMethod(.Generic)
     return(as_reactive_logical(value, ops_expr))
@@ -60,8 +77,9 @@ Ops.reactive_lgl <- function (e1, e2) {
     e2_expr <- enquo(e2)
   }
 
+  f <- as_closure(.Generic)
   ops_expr <- quo({
-    match.fun(!!.Generic)(!!e1_expr, !!e2_expr)
+    f(!!e1_expr, !!e2_expr)
   })
   
   value <- NextMethod(.Generic)

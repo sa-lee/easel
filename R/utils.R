@@ -17,10 +17,6 @@ all_are_plibble <- function(x) {
 }
 
 
-get_reactive_expr <- function(x) {
-  attr(x, "expr")
-}
-
 has_reactive_attr <- function(x) {
   !is.null(get_reactive_expr(x))
 }

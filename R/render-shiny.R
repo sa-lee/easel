@@ -26,7 +26,8 @@ render_shiny <- function(x) {
   which_reactives <- Filter(function(.) ncol(.) > 0, which_reactives)
   
   ui <- shiny::fluidPage(
-    vegawidget::vegawidgetOutput("vis")
+    vegawidget::vegawidgetOutput("vis"),
+    shiny::verbatimTextOutput("debug")
   )
   
   server <- function(input, output, session) {
@@ -49,32 +50,79 @@ render_shiny <- function(x) {
     if (length(which_reactives) > 0) {
       layer <- dplyr::select(pl[[1]], dplyr::starts_with("aes"))
       
-      sel <-  shiny::reactive({
-        get_reactive_expr(which_reactives[[1]]$sel)
-      }, quoted = TRUE)
+      stage_selection <- which_reactives[[1]]$sel
+      # any updates based on selections
+      # transient changes --
+      pipeline <- get_pipeline(layer)
+      mutate_stages <- setdiff(c("mutate", "mutate_persistent"), 
+                                 names(pipeline))
       
-      parse_new_data <- rlang::fn_fmls(get_pipeline(layer)$mutate)$dots
-      parse_new_data <- parse_new_data[grep("^aes", names(parse_new_data))] 
-      
-      updates <- shiny::reactive({
-        lapply(parse_new_data, 
-               function(.) rlang::env_bind(quo_get_env(.),
-                                           sel = sel()))
+      if (length(mutate_stages) == 1) {
         
-        changeset <- mutate_eager(layer, !!!parse_new_data)
-        jsonlite::toJSON(changeset, dataframe = "rows")
-      })
-      
-      observe({
-        changeset <- updates()
-        vegawidget:::vw_call_view("vis", "change",
-                                  list(name = "source",
-                                       data = changeset)
-        )
+        message("updating transiently")
+        env_bind(get_reactive_env(stage_selection),
+                         input = input)
+        sel <-  shiny::reactive(
+          get_reactive_expr(stage_selection),
+          quoted = TRUE,
+          env = get_reactive_env(stage_selection))
+        print(sel)
+        parse_new_data <- rlang::fn_fmls(pipeline$mutate)$dots
+        parse_new_data <- parse_new_data[grep("^aes", names(parse_new_data))]
+        print(parse_new_data)
         
+        transient_updates <- shiny::reactive({
+          lapply(parse_new_data,
+                 function(.) rlang::env_bind(quo_get_env(.),
+                                             sel = sel()))
+          
+          changeset <- mutate_eager(layer, !!!parse_new_data)
+          jsonlite::toJSON(changeset, dataframe = "rows")
+        })
+        
+        shiny::observe({
+          changeset <- transient_updates()
+          vegawidget:::vw_call_view("vis", "change",
+                                    list(name = "source",
+                                         data = changeset))
+        })
+      } else if (length(mutate_stages) == 0) {
+        message("persisently updating stuff")
+        parse_new_data <- rlang::fn_fmls(pipeline$mutate_persistent)$dots
+        parse_new_data <- parse_new_data[grep("^aes", names(parse_new_data))]
+        
+      
+        sel <- as.logical(stage_selection)
+        
+        # update_state <- shiny::reactive({
+        #   cur_state <- selection()
+        #   state <<- state | cur_state
+        #   state
+        # })
+        
+        renv <- child_env(get_reactive_env(stage_selection),
+                          input = input,
+                          sel = sel)
+        selection <- shiny::reactive(expr({
+          !!get_reactive_expr(stage_selection)
+        })
+        ,
+        quoted = TRUE,
+        env = renv)
+        
+        update_state <- reactive({renv$sel <<- selection()})
+        
+        
+        
+      }
+      
+          
+      output$debug <- shiny::renderPrint({
+        selection()
       })
     }
   }
+  
   
   shiny::shinyApp(ui, server)
 }
